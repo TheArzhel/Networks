@@ -1,4 +1,4 @@
-#include "Networks.h"
+﻿#include "Networks.h"
 #include "ModuleNetworking.h"
 
 
@@ -90,6 +90,7 @@ bool ModuleNetworking::preUpdate()
 
 	// create a list with disconnected sockets
 	std::list< SOCKET > disconnectedSockets;
+
 	// TODO(jesus): for those sockets selected, check wheter or not they are
 	// a listen socket or a standard socket and perform the corresponding
 	// operation (accept() an incoming connection or recv() incoming data,
@@ -97,6 +98,16 @@ bool ModuleNetworking::preUpdate()
 	// On accept() success, communicate the new connected socket to the
 	// subclass (use the callback onSocketConnected()), and add the new
 	// connected socket to the managed list of sockets.
+	// TODO(jesus): handle disconnections. Remember that a socket has been
+	// disconnected from its remote end either when recv() returned 0,
+	// or when it generated some errors such as ECONNRESET.
+	// Communicate detected disconnections to the subclass using the callback
+	// onSocketDisconnected().
+	// On recv() success, communicate the incoming data received to the
+	// subclass (use the callback onSocketReceivedData()).
+
+
+
 
 
 	if (!sockets.empty())
@@ -136,34 +147,38 @@ bool ModuleNetworking::preUpdate()
 						onSocketConnected(ListenerSocket, listenerAddress);
 					}
 				}
-				else
+				else // if standard socket
 				{
+					// receive information
+					// recv​(​s​,​ inputBuffer​,​ inputBufferLen​,​​0​)
 					ret = recv(s, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
-
+					
+					
+					// error handle
 					if (ret == SOCKET_ERROR)
 					{
-						reportError("Connection Error Receiving the Information");
 						disconnectedSockets.push_back(s);
+						reportError("Module Networking. identify standard socket. Failed top recieve data");
 					}
 					else
 					{
 						if (ret == 0 || ret == ECONNRESET)
 						{
-							// TODO(jesus): handle disconnections. Remember that a socket has been
-							// disconnected from its remote end either when recv() returned 0,
-							// or when it generated some errors such as ECONNRESET.
-							// Communicate detected disconnections to the subclass using the callback
-							// onSocketDisconnected().
+							// to handle disconections, if recv -> 0 or error ECONNRESET
+							// use the callback onSocketDisconnected() to disconnect
 							disconnectedSockets.push_back(s);
+							
 						}
-						else
+						else // if everything work properly
 						{
-							// On recv() success, communicate the incoming data received to the
-							// subclass (use the callback onSocketReceivedData()).
-							//incomingDataBuffer[ret] = '\0';
-							onSocketReceivedData(sockets[i], incomingDataBuffer);
-						}
+							// pass the recived data with onSocketReceivedData()
 
+							// to set the end of the string
+							//ask jesus to knwo if the problem is the incorrect incomingdatabuffersize
+							incomingDataBuffer[ret] = '\0';
+							onSocketReceivedData(s, incomingDataBuffer);
+
+						}
 					}
 				}
 			}
@@ -173,21 +188,27 @@ bool ModuleNetworking::preUpdate()
 	// TODO(jesus): Finally, remove all disconnected sockets from the list
 	// of managed sockets.
 
-	for (std::list<SOCKET>::iterator it = disconnectedSockets.begin(); it != disconnectedSockets.end(); it++)
+	// iterate if the socket is ready to be disconnected
+	if (!sockets.empty() && !disconnectedSockets.empty())
 	{
-		if (sockets.size() > 0)
+		for (std::list<SOCKET>::iterator it = disconnectedSockets.begin(); it != disconnectedSockets.end(); it++)
 		{
-			for (int i = 0; i < sockets.size(); i++)
+			int index = 0;
+			for (auto s : sockets)
 			{
-				if (*it == sockets[i])
+				if (*it == s)
 				{
-					onSocketDisconnected(sockets[i]);
-					sockets.erase(sockets.begin() + i);
+					// delete and disconnect the correct socket
+					onSocketDisconnected(s);
+					sockets.erase(sockets.begin() + index );
 				}
-			}
-		}
-	}
 
+			index++;
+			}
+
+		}
+
+	}
 	return true;
 }
 
