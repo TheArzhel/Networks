@@ -1,18 +1,41 @@
-#include "ModuleNetworkingClient.h"
+﻿#include "ModuleNetworkingClient.h"
 
 
 bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPort, const char *pplayerName)
 {
+	int ret = 0;
 	playerName = pplayerName;
 
 	// TODO(jesus): TCP connection stuff
-	// - Create the socket
-	// - Create the remote address object
-	// - Connect to the remote address
-	// - Add the created socket to the managed list of sockets using addSocket()
+	// Create the socket
+	Socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (Socket == INVALID_SOCKET)
+	{
+		reportError("Client Error Creating the Socket");
+	}
 
-	// If everything was ok... change the state
-	state = ClientState::Start;
+	// Destination IP address (to connect to a remote host)
+	serverAddress.sin_family = AF_INET;
+	serverAddress.sin_port = htons(serverPort);
+	//inet_pton​(​AF_INET​,​ remoteAddrStr​,​​&​remoteAddr​.​sin_addr​);
+	inet_pton(AF_INET, serverAddressStr, &serverAddress.sin_addr);
+
+	// Any process that wants to initiate a new connection has to use the ​connect​ function
+	ret = connect(Socket, (const sockaddr*)&serverAddress, sizeof(serverAddress));
+	if (ret == SOCKET_ERROR)
+	{
+		reportError("Client Error Conecting to the Server");
+	}
+	else
+	{
+		// - Add the created socket to the managed list of sockets using addSocket()
+		addSocket(Socket);
+
+		// If everything was ok... change the state
+		state = ClientState::Start;
+	}
+
+
 
 	return true;
 }
@@ -27,6 +50,11 @@ bool ModuleNetworkingClient::update()
 	if (state == ClientState::Start)
 	{
 		// TODO(jesus): Send the player name to the server
+		int ret = send(Socket, playerName.c_str(), playerName.size(), 0);
+		if (ret == SOCKET_ERROR)
+		{
+			reportError("Client Error sending Name");
+		}
 	}
 
 	return true;
@@ -44,6 +72,11 @@ bool ModuleNetworkingClient::gui()
 		ImGui::Image(tex->shaderResource, texSize);
 
 		ImGui::Text("%s connected to the server...", playerName.c_str());
+		if (ImGui::Button("Disconect"))
+		{
+			onSocketDisconnected(Socket);
+			shutdown(Socket, 2);
+		}
 
 		ImGui::End();
 	}

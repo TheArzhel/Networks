@@ -1,4 +1,4 @@
-#include "ModuleNetworkingServer.h"
+﻿#include "ModuleNetworkingServer.h"
 
 
 
@@ -9,14 +9,51 @@
 
 bool ModuleNetworkingServer::start(int port)
 {
+	int ret = 0;
 	// TODO(jesus): TCP listen socket stuff
-	// - Create the listenSocket
-	// - Set address reuse
-	// - Bind the socket to a local interface
-	// - Enter in listen mode
-	// - Add the listenSocket to the managed list of sockets using addSocket()
+	listenSocket = socket(AF_INET, SOCK_STREAM, 0);   // Create TCP socket
+	if (listenSocket == INVALID_SOCKET)
+	{
+		reportError("Server Error Creating the Socket");
+	}
 
-	state = ServerState::Listening;
+	// before invoking ​bind​, the socket configured to force reusing the given 
+	// address/portbefore calling the function ​bind
+	int enable = 1;
+	ret = setsockopt(listenSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(int));
+	if (ret == SOCKET_ERROR)
+	{
+		reportError("Server Error Enabling the Socket");
+	}
+
+	// -To represent addresses the lib uses struct sockaddr
+	sockaddr_in bindAddr;
+	bindAddr.sin_family = AF_INET; //ipv4
+	bindAddr.sin_port = htons(port); // port
+	bindAddr.sin_addr.S_un.S_addr = INADDR_ANY; // local ip adress
+
+	// int​ bind​(SOCKET s​, const​​struct​ sockaddr ​*​ address​, int​ address_len​);
+	ret = bind(listenSocket, (const sockaddr*)&bindAddr, sizeof(bindAddr));
+	if (ret == SOCKET_ERROR)
+	{
+		reportError("Server Error Binding the Socket");
+	}
+
+	// Enter in listen mode
+	// Ask Jesus the effects
+	ret = listen(listenSocket, 10);
+	if (ret == SOCKET_ERROR)
+	{
+		reportError("Server Error Listening");
+	}
+	else
+	{
+		// Add Socket to the list 
+		// Cuidado
+		addSocket(listenSocket);
+
+		state = ServerState::Listening;
+	}
 
 	return true;
 }
@@ -47,6 +84,12 @@ bool ModuleNetworkingServer::gui()
 		Texture *tex = App->modResources->server;
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
 		ImGui::Image(tex->shaderResource, texSize);
+
+		if (ImGui::Button("Close Server"))
+		{
+			disconnect();
+			state = ServerState::Stopped;
+		}
 
 		ImGui::Text("List of connected sockets:");
 

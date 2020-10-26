@@ -52,7 +52,7 @@ private:
 	ClientState state = ClientState::Stopped;
 
 	sockaddr_in serverAddress = {};
-	SOCKET socket = INVALID_SOCKET;
+	SOCKET Socket = INVALID_SOCKET;
 
 	std::string playerName;
 };
