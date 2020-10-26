@@ -11,7 +11,10 @@ bool ModuleNetworkingServer::start(int port)
 {
 	int ret = 0;
 	// TODO(jesus): TCP listen socket stuff
-	listenSocket = socket(AF_INET, SOCK_STREAM, 0);   // Create TCP socket
+	// Create TCP socket
+	listenSocket = socket(AF_INET, SOCK_STREAM, 0);   
+
+	//Report Error
 	if (listenSocket == INVALID_SOCKET)
 	{
 		reportError("Fail to Create the Server Socket");
@@ -21,6 +24,7 @@ bool ModuleNetworkingServer::start(int port)
 	// address/portbefore calling the function ​bind
 	int enable = 1;
 	ret = setsockopt(listenSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(int));
+	//Report Error
 	if (ret == SOCKET_ERROR)
 	{
 		reportError("Given Addres Failure before invoking the Bind in Server");
@@ -34,6 +38,7 @@ bool ModuleNetworkingServer::start(int port)
 
 	// int​ bind​(SOCKET s​, const​​struct​ sockaddr ​*​ address​, int​ address_len​);
 	ret = bind(listenSocket, (const sockaddr*)&bindAddr, sizeof(bindAddr));
+	//Report Error
 	if (ret == SOCKET_ERROR)
 	{
 		reportError("Fail to Bind Server Socket");
@@ -42,6 +47,7 @@ bool ModuleNetworkingServer::start(int port)
 	// Enter in listen mode
 	// Ask Jesus the effects
 	ret = listen(listenSocket, 10);
+	//Report Error
 	if (ret == SOCKET_ERROR)
 	{
 		reportError("Server fails to Listen");
@@ -49,7 +55,6 @@ bool ModuleNetworkingServer::start(int port)
 	else
 	{
 		// Add Socket to the list 
-		// Cuidado
 		addSocket(listenSocket);
 
 		state = ServerState::Listening;

@@ -9,6 +9,7 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 	// TODO(jesus): TCP connection stuff
 	// Create the socket
 	Socket = socket(AF_INET, SOCK_STREAM, 0);
+	//Report Error
 	if (Socket == INVALID_SOCKET)
 	{
 		reportError("Fail to create Client Socket");
@@ -25,7 +26,7 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 	// Any process that wants to initiate a new connection has to use the ​connect​ function
 	// int​ connect​(​SOCKET s​,​​const​​struct​ sockaddr ​*​ addr​,​​int​ addrlen​);
 	ret = connect(Socket, (const sockaddr*)&serverAddress, sizeof(serverAddress));
-
+	//Report Error
 	if (ret == SOCKET_ERROR)
 	{
 		reportError("Fail to connect Client to Server");
