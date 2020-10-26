@@ -11,20 +11,24 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 	Socket = socket(AF_INET, SOCK_STREAM, 0);
 	if (Socket == INVALID_SOCKET)
 	{
-		reportError("Client Error Creating the Socket");
+		reportError("Fail to create Client Socket");
 	}
 
 	// Destination IP address (to connect to a remote host)
 	serverAddress.sin_family = AF_INET;
 	serverAddress.sin_port = htons(serverPort);
+	//We can use the function ​inet_pton​ to convert aformatted string into the appropriate 
+	//library’s IP address internal data format
 	//inet_pton​(​AF_INET​,​ remoteAddrStr​,​​&​remoteAddr​.​sin_addr​);
 	inet_pton(AF_INET, serverAddressStr, &serverAddress.sin_addr);
 
 	// Any process that wants to initiate a new connection has to use the ​connect​ function
+	// int​ connect​(​SOCKET s​,​​const​​struct​ sockaddr ​*​ addr​,​​int​ addrlen​);
 	ret = connect(Socket, (const sockaddr*)&serverAddress, sizeof(serverAddress));
+
 	if (ret == SOCKET_ERROR)
 	{
-		reportError("Client Error Conecting to the Server");
+		reportError("Fail to connect Client to Server");
 	}
 	else
 	{

@@ -14,7 +14,7 @@ bool ModuleNetworkingServer::start(int port)
 	listenSocket = socket(AF_INET, SOCK_STREAM, 0);   // Create TCP socket
 	if (listenSocket == INVALID_SOCKET)
 	{
-		reportError("Server Error Creating the Socket");
+		reportError("Fail to Create the Server Socket");
 	}
 
 	// before invoking ​bind​, the socket configured to force reusing the given 
@@ -23,7 +23,7 @@ bool ModuleNetworkingServer::start(int port)
 	ret = setsockopt(listenSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&enable, sizeof(int));
 	if (ret == SOCKET_ERROR)
 	{
-		reportError("Server Error Enabling the Socket");
+		reportError("Given Addres Failure before invoking the Bind in Server");
 	}
 
 	// -To represent addresses the lib uses struct sockaddr
@@ -36,7 +36,7 @@ bool ModuleNetworkingServer::start(int port)
 	ret = bind(listenSocket, (const sockaddr*)&bindAddr, sizeof(bindAddr));
 	if (ret == SOCKET_ERROR)
 	{
-		reportError("Server Error Binding the Socket");
+		reportError("Fail to Bind Server Socket");
 	}
 
 	// Enter in listen mode
@@ -44,7 +44,7 @@ bool ModuleNetworkingServer::start(int port)
 	ret = listen(listenSocket, 10);
 	if (ret == SOCKET_ERROR)
 	{
-		reportError("Server Error Listening");
+		reportError("Server fails to Listen");
 	}
 	else
 	{
