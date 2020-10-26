@@ -54,10 +54,12 @@ bool ModuleNetworkingClient::update()
 	if (state == ClientState::Start)
 	{
 		// TODO(jesus): Send the player name to the server
+
+		// int​ send​(​SOCKET s​,​​const​​char​​*​ buf​,​​int​ len​,​​int​ flags​);
 		int ret = send(Socket, playerName.c_str(), playerName.size(), 0);
 		if (ret == SOCKET_ERROR)
 		{
-			reportError("Client Error sending Name");
+			reportError("Fail to send Name, client based error. ClientUpdate");
 		}
 	}
 
