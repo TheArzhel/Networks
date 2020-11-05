@@ -1,9 +1,10 @@
+// important not to change actual order or it wont compile
 
-#include "MemoryStream.cpp"
 #include "stdafx.h"
 
 #include "Networks.h"
 
+#include "MemoryStream.cpp"
 #include "ModuleNetworking.cpp"
 #include "ModuleNetworkingClient.cpp"
 #include "ModuleNetworkingServer.cpp"
@@ -23,4 +24,3 @@
 #include "ScreenGame.cpp"
 #include "Application.cpp"
 #include "main.cpp"
-

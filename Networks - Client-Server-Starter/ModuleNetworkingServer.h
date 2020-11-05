@@ -74,6 +74,6 @@ private:
 
 	std::vector<ConnectedSocket> connectedSockets;
 
-	std::vector<ConnectedSocket> connectedSockets;
+	
 };
 
