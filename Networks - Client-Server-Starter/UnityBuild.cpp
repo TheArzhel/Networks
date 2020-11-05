@@ -21,3 +21,5 @@
 #include "ScreenGame.cpp"
 #include "Application.cpp"
 #include "main.cpp"
+
+#include "MemoryStream.cpp"

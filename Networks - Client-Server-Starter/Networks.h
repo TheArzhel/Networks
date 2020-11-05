@@ -204,3 +204,5 @@ inline float fractionalPart(float number)
 #include "ScreenMainMenu.h"
 #include "ScreenGame.h"
 #include "Application.h"
+#include "MemoryStream.h"
+#include "Messages.h"
