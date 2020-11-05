@@ -90,9 +90,10 @@ bool ModuleNetworkingServer::gui()
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
 		ImGui::Image(tex->shaderResource, texSize);
 
-		if (ImGui::Button("Shut Deth Star Server"))
+		if (ImGui::Button("Shut Death Star Server"))
 		{
 			disconnect();
+			connectedSockets.clear();
 			state = ServerState::Stopped;
 		}
 
@@ -178,7 +179,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				else
 				{
 					connectedSockets[i].playerName = playername;
-					welcom_message = "Traitor! Identify yourself, Your name is already used! \n Please logout!";
+					welcom_message = "Traitor! Identify yourself, Your name is already used!";
 					_packet << ServerMessage::Unwelcome;
 				}
 

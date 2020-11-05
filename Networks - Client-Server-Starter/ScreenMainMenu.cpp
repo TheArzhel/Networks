@@ -8,10 +8,10 @@ void ScreenMainMenu::enable()
 	WLOG("Example Warning log entry...");
 	ELOG("Example Error log entry...");*/
 
-	LOG("starting Death Satr engines...");
-	DLOG("Awaiting darth sidious command...");
-	WLOG("WARNING Rebels in the area...");
-	ELOG("ERROR 404 JEDI not found...");
+	LOG("starting Death Statr engines...");
+	//DLOG("Awaiting darth sidious command...");
+	//WLOG("WARNING Rebels in the area...");
+	//ELOG("ERROR 404 JEDI not found...");
 }
 
 void ScreenMainMenu::gui()
@@ -48,7 +48,7 @@ void ScreenMainMenu::gui()
 	static int remoteServerPort = 8888;
 	ImGui::InputInt("Server port", &remoteServerPort);
 
-	static char playerNameStr[64] = "Dart Vader";
+	static char playerNameStr[64] = "Darth Vader";
 	ImGui::InputText("Player name", playerNameStr, sizeof(playerNameStr));
 
 	if (ImGui::Button("Connect to Death Star server"))

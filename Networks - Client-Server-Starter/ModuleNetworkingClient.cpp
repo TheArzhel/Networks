@@ -133,7 +133,7 @@ bool ModuleNetworkingClient::gui()
 			shutdown(Socket, 2);
 		}
 
-		ImGui::BeginChild("Xat", ImVec2(375, 400), true);  //updated start
+		ImGui::BeginChild("Chat", ImVec2(375, 400), true);  //updated start
 
 		for (int i = 0; i < Messages.size(); ++i)
 		{
