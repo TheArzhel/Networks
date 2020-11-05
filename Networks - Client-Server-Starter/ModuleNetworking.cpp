@@ -61,7 +61,9 @@ bool ModuleNetworking::preUpdate()
 	// NOTE(jesus): You can use this temporary buffer to store data from recv()
 
 	const uint32 incomingDataBufferSize = Kilobytes(1);
-	byte incomingDataBuffer[incomingDataBufferSize];
+	//byte incomingDataBuffer[incomingDataBufferSize];
+
+	InputMemoryStream packet; //UPDATED
 
 	// New socket set
 	fd_set readfs;
@@ -151,8 +153,8 @@ bool ModuleNetworking::preUpdate()
 				{
 					// receive information
 					// recv​(​s​,​ inputBuffer​,​ inputBufferLen​,​​0​)
-					ret = recv(s, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
-					
+					//ret = recv(s, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
+					ret = recv(s, (char*)packet.GetBufferPtr(), packet.GetCapacity(), 0); //UPDATE
 					
 					// error handle
 					if (ret == SOCKET_ERROR)
@@ -175,8 +177,11 @@ bool ModuleNetworking::preUpdate()
 
 							// to set the end of the string
 							//ask jesus to knwo if the problem is the incorrect incomingdatabuffersize
-							incomingDataBuffer[ret] = '\0';
-							onSocketReceivedData(s, incomingDataBuffer);
+							//incomingDataBuffer[ret] = '\0';
+							//onSocketReceivedData(s, incomingDataBuffer);
+
+							packet.SetSize((uint32)ret);   //updated
+							onSocketReceivedData(s, packet); //updated
 
 						}
 					}
@@ -233,4 +238,17 @@ bool ModuleNetworking::cleanUp()
 void ModuleNetworking::addSocket(SOCKET socket)
 {
 	sockets.push_back(socket);
+}
+
+bool ModuleNetworking::sendPacket(const OutputMemoryStream & packet, SOCKET socket)  //updated
+{
+	int result = send(socket, packet.GetBufferPtr(), packet.GetSize(), 0);
+
+	if (result == SOCKET_ERROR)
+	{
+		reportError("Error Sending Packet");
+		return false;
+	}
+
+	return true;
 }

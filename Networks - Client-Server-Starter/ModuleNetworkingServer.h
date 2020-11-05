@@ -36,7 +36,9 @@ private:
 
 	void onSocketConnected(SOCKET socket, const sockaddr_in &socketAddress) override;
 
-	void onSocketReceivedData(SOCKET socket, byte * data) override;
+	//void onSocketReceivedData(SOCKET socket, byte * data) override;
+	void onSocketReceivedData(SOCKET socket, const InputMemoryStream &packet) override; // updated
+
 
 	void onSocketDisconnected(SOCKET socket) override;
 
@@ -62,6 +64,15 @@ private:
 		SOCKET socket;
 		std::string playerName;
 	};
+
+	//////////////////////////////////////////////////////////////////////
+	// Server methods UPDATED
+	//////////////////////////////////////////////////////////////////////
+
+	bool checkUserName(std::string name);
+	void executeCommand(std::string command, SOCKET socket);
+
+	std::vector<ConnectedSocket> connectedSockets;
 
 	std::vector<ConnectedSocket> connectedSockets;
 };

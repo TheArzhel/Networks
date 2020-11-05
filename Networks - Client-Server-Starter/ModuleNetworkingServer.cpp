@@ -90,7 +90,7 @@ bool ModuleNetworkingServer::gui()
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
 		ImGui::Image(tex->shaderResource, texSize);
 
-		if (ImGui::Button("Close Server"))
+		if (ImGui::Button("Shut Deth Star Server"))
 		{
 			disconnect();
 			state = ServerState::Stopped;
@@ -137,29 +137,283 @@ void ModuleNetworkingServer::onSocketConnected(SOCKET socket, const sockaddr_in 
 	connectedSockets.push_back(connectedSocket);
 }
 
-void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, byte * data)
+void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemoryStream &packet)
 {
-	// Set the player name of the corresponding connected socket proxy
-	for (auto &connectedSocket : connectedSockets)
+	//// Set the player name of the corresponding connected socket proxy
+	//for (auto &connectedSocket : connectedSockets)
+	//{
+	//	if (connectedSocket.socket == socket)
+	//	{
+	//		connectedSocket.playerName = (const char *)data;
+	//	}
+	//}
+
+	// updated
+
+
+	ClientMessage clientMessage;
+	packet >> clientMessage;
+
+	if (clientMessage == ClientMessage::Hello)
 	{
-		if (connectedSocket.socket == socket)
+		std::string playername;
+		packet >> playername;
+
+		bool notify = false;
+
+		for (int i = 0; i < connectedSockets.size(); ++i)
 		{
-			connectedSocket.playerName = (const char *)data;
+			if (connectedSockets[i].socket == socket)
+			{
+				OutputMemoryStream _packet;
+				std::string welcom_message;
+
+				if (checkUserName(playername))
+				{
+					connectedSockets[i].playerName = playername;
+					welcom_message = "Welcome To The Death Star server!";
+					_packet << ServerMessage::Welcome;
+					notify = true;
+				}
+				else
+				{
+					connectedSockets[i].playerName = playername;
+					welcom_message = "Traitor! Identify yourself, Your name is already used! \n Please logout!";
+					_packet << ServerMessage::Unwelcome;
+				}
+
+				_packet << welcom_message;
+
+				int ret = sendPacket(_packet, socket);
+				if (ret == SOCKET_ERROR)
+				{
+					reportError("Error Sending Welcome Packet");
+				}
+			}
+		}
+		if (notify)
+		{
+			for (int i = 0; i < connectedSockets.size(); ++i)
+			{
+				if (connectedSockets[i].socket != socket)
+				{
+					OutputMemoryStream _packet;
+					_packet << ServerMessage::Newuser;
+
+					std::string newuser_message = playername + " joined the dark side of the force";
+					_packet << newuser_message;
+
+					int ret = sendPacket(_packet, connectedSockets[i].socket);
+					if (ret == SOCKET_ERROR)
+					{
+						reportError("Error Sending Welcome Packet");
+					}
+				}
+			}
+		}
+	}
+
+	if (clientMessage == ClientMessage::Send)
+	{
+		std::string playername;
+
+		for (int i = 0; i < connectedSockets.size(); ++i)
+		{
+			if (connectedSockets[i].socket == socket)
+			{
+				playername = connectedSockets[i].playerName;
+			}
+		}
+
+		std::string message;
+		packet >> message;
+
+		OutputMemoryStream _packet;
+		_packet << ServerMessage::Newmessage;
+
+		std::string text = playername + ": " + message;
+		_packet << text;
+
+		for (int i = 0; i < connectedSockets.size(); ++i)
+		{
+			int ret = sendPacket(_packet, connectedSockets[i].socket);
+
+			if (ret == SOCKET_ERROR)
+			{
+				reportError("Error Sending Welcome Packet");
+			}
+		}
+	}
+
+	if (clientMessage == ClientMessage::Command)
+	{
+		for (int i = 0; i < connectedSockets.size(); ++i)
+		{
+			if (connectedSockets[i].socket == socket)
+			{
+				std::string command;
+				packet >> command;
+
+				executeCommand(command, connectedSockets[i].socket);
+			}
 		}
 	}
 }
 
 void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 {
+	//updated
+	std::string playername;
+
 	// Remove the connected socket from the list
 	for (auto it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
 	{
 		auto &connectedSocket = *it;
 		if (connectedSocket.socket == socket)
 		{
+			playername = connectedSocket.playerName;
 			connectedSockets.erase(it);
 			break;
 		}
 	}
+
+	OutputMemoryStream _packet;
+	_packet << ServerMessage::Userdisconnected;
+
+	std::string text = playername + " left";
+	_packet << text;
+
+	for (int i = 0; i < connectedSockets.size(); ++i)
+	{
+		int ret = sendPacket(_packet, connectedSockets[i].socket);
+
+		if (ret == SOCKET_ERROR)
+		{
+			reportError("Error Sending Welcome Packet");
+		}
+	}
 }
+
+//fropm now on all new
+
+bool ModuleNetworkingServer::checkUserName(std::string name)
+{
+	for (int i = 0; i < connectedSockets.size(); ++i)
+	{
+		if (name == connectedSockets[i].playerName)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+void ModuleNetworkingServer::executeCommand(std::string command, SOCKET socket)
+{
+	if (command.find("help") != std::string::npos)
+	{
+		OutputMemoryStream _packet;
+		_packet << ServerMessage::Command;
+
+		std::string newuser_message = "Command list:\n /help \n /list \n /kick [name] \n /whisper [name] [message] \n /change_name [name]";
+		_packet << newuser_message;
+
+		int ret = sendPacket(_packet, socket);
+		if (ret == SOCKET_ERROR)
+		{
+			reportError("Error Sending Welcom Packet");
+		}
+	}
+	else if (command.find("list") != std::string::npos)
+	{
+		OutputMemoryStream _packet;
+		_packet << ServerMessage::Command;
+
+		std::string newuser_message = "Users connected: \n";
+
+		for (int i = 0; i < connectedSockets.size(); i++)
+		{
+			newuser_message = newuser_message + "- " + connectedSockets[i].playerName;
+			if (i < connectedSockets.size() - 1)
+			{
+				newuser_message = newuser_message + "\n";
+			}
+		}
+
+		_packet << newuser_message;
+
+		int ret = sendPacket(_packet, socket);
+		if (ret == SOCKET_ERROR)
+		{
+			reportError("Error Sending Welcom Packet");
+		}
+	}
+	else if (command.find("kick") != std::string::npos)
+	{
+		for (int i = 0; i < connectedSockets.size(); i++)
+		{
+			if (command.find(connectedSockets[i].playerName) != std::string::npos)
+			{
+				OutputMemoryStream _packet;
+				_packet << ServerMessage::ComDisconnect;
+
+				int ret = sendPacket(_packet, connectedSockets[i].socket);
+				if (ret == SOCKET_ERROR)
+				{
+					reportError("Error Sending Welcom Packet");
+				}
+			}
+		}
+	}
+	else if (command.find("whisper") != std::string::npos)
+	{
+		std::string remove_1 = "/whisper ";
+		command.erase(0, remove_1.size());
+
+		for (int i = 0; i < connectedSockets.size(); i++)
+		{
+			if (command.find(connectedSockets[i].playerName) != std::string::npos)
+			{
+				std::string remove_2 = connectedSockets[i].playerName + " ";
+				command.erase(0, remove_2.size());
+
+				OutputMemoryStream _packet;
+				_packet << ServerMessage::Newmessage;
+				_packet << command;
+
+				int ret = sendPacket(_packet, connectedSockets[i].socket);
+				if (ret == SOCKET_ERROR)
+				{
+					reportError("Error Sending Welcom Packet");
+				}
+			}
+		}
+	}
+	else if (command.find("change_name") != std::string::npos)
+	{
+		std::string remove_1 = "/change_name ";
+		command.erase(0, remove_1.size());
+
+		for (int i = 0; i < connectedSockets.size(); i++)
+		{
+			if (connectedSockets[i].socket == socket)
+			{
+				connectedSockets[i].playerName = command;
+
+				OutputMemoryStream _packet;
+				_packet << ServerMessage::NewName;
+				_packet << command;
+
+				int ret = sendPacket(_packet, connectedSockets[i].socket);
+				if (ret == SOCKET_ERROR)
+				{
+					reportError("Error Sending Welcom Packet");
+				}
+			}
+		}
+
+	}
+}
+
+
 
