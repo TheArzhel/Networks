@@ -149,12 +149,15 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	//	}
 	//}
 
-	// updated
+	// updated OK
 
 
 	ClientMessage clientMessage;
 	packet >> clientMessage;
 
+	//roger maybe switch
+	// create state machine
+	//act depending on the client message
 	if (clientMessage == ClientMessage::Hello)
 	{
 		std::string playername;
@@ -162,6 +165,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 		bool notify = false;
 
+		//roger maybe auto
 		for (int i = 0; i < connectedSockets.size(); ++i)
 		{
 			if (connectedSockets[i].socket == socket)
@@ -169,18 +173,18 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				OutputMemoryStream _packet;
 				std::string welcom_message;
 
-				if (checkUserName(playername))
+				if (CheckName(playername))
 				{
+					_packet << ServerMessage::Welcome;
 					connectedSockets[i].playerName = playername;
 					welcom_message = "Welcome To The Death Star server!";
-					_packet << ServerMessage::Welcome;
 					notify = true;
 				}
 				else
 				{
+					_packet << ServerMessage::Unwelcome;
 					connectedSockets[i].playerName = playername;
 					welcom_message = "Traitor! Identify yourself, Your name is already used!";
-					_packet << ServerMessage::Unwelcome;
 				}
 
 				_packet << welcom_message;
@@ -188,12 +192,13 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				int ret = sendPacket(_packet, socket);
 				if (ret == SOCKET_ERROR)
 				{
-					reportError("Error Sending Welcome Packet");
+					reportError("Welcome package commette not sed. ERROR");
 				}
 			}
 		}
 		if (notify)
 		{
+			//Roger maybe auto
 			for (int i = 0; i < connectedSockets.size(); ++i)
 			{
 				if (connectedSockets[i].socket != socket)
@@ -207,7 +212,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 					int ret = sendPacket(_packet, connectedSockets[i].socket);
 					if (ret == SOCKET_ERROR)
 					{
-						reportError("Error Sending Welcome Packet");
+						reportError("Welcome package commette not sed. ERROR");
 					}
 				}
 			}
@@ -241,7 +246,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 			if (ret == SOCKET_ERROR)
 			{
-				reportError("Error Sending Welcome Packet");
+				reportError("Welcome package commette not sed. ERROR");
 			}
 		}
 	}
@@ -255,7 +260,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				std::string command;
 				packet >> command;
 
-				executeCommand(command, connectedSockets[i].socket);
+				CommandToExecute(command, connectedSockets[i].socket);
 			}
 		}
 	}
@@ -263,7 +268,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 {
-	//updated
+	//updated OK
 	std::string playername;
 
 	// Remove the connected socket from the list
@@ -281,24 +286,25 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 	OutputMemoryStream _packet;
 	_packet << ServerMessage::Userdisconnected;
 
-	std::string text = playername + " left";
+	std::string text = playername + " left The battle. May the Force be with you";
 	_packet << text;
-
+	//Roger maybe auto
 	for (int i = 0; i < connectedSockets.size(); ++i)
 	{
 		int ret = sendPacket(_packet, connectedSockets[i].socket);
 
 		if (ret == SOCKET_ERROR)
 		{
-			reportError("Error Sending Welcome Packet");
+			reportError("Welcome package commette not sed. ERROR");
 		}
 	}
 }
 
-//fropm now on all new
+//from now on all new
 
-bool ModuleNetworkingServer::checkUserName(std::string name)
+bool ModuleNetworkingServer::CheckName(std::string name)
 {
+	//roger maybe auto
 	for (int i = 0; i < connectedSockets.size(); ++i)
 	{
 		if (name == connectedSockets[i].playerName)
@@ -309,7 +315,7 @@ bool ModuleNetworkingServer::checkUserName(std::string name)
 	return true;
 }
 
-void ModuleNetworkingServer::executeCommand(std::string command, SOCKET socket)
+void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket)
 {
 	if (command.find("help") != std::string::npos)
 	{
@@ -322,7 +328,7 @@ void ModuleNetworkingServer::executeCommand(std::string command, SOCKET socket)
 		int ret = sendPacket(_packet, socket);
 		if (ret == SOCKET_ERROR)
 		{
-			reportError("Error Sending Welcom Packet");
+			reportError("Welcome package commette not sed. ERROR");
 		}
 	}
 	else if (command.find("list") != std::string::npos)
@@ -346,11 +352,12 @@ void ModuleNetworkingServer::executeCommand(std::string command, SOCKET socket)
 		int ret = sendPacket(_packet, socket);
 		if (ret == SOCKET_ERROR)
 		{
-			reportError("Error Sending Welcom Packet");
+			reportError("Welcome package commette not sed. ERROR");
 		}
 	}
 	else if (command.find("kick") != std::string::npos)
 	{
+		bool found = false;
 		for (int i = 0; i < connectedSockets.size(); i++)
 		{
 			if (command.find(connectedSockets[i].playerName) != std::string::npos)
@@ -361,13 +368,26 @@ void ModuleNetworkingServer::executeCommand(std::string command, SOCKET socket)
 				int ret = sendPacket(_packet, connectedSockets[i].socket);
 				if (ret == SOCKET_ERROR)
 				{
-					reportError("Error Sending Welcom Packet");
+					reportError("Welcome package commette not sed. ERROR");
 				}
+				found = true;
 			}
+			
+		}
+		if (!found)
+		{
+			std::string error = "user not found. ERROR";
+			reportError("user not found. ERROR"); // server message
+			OutputMemoryStream _packet;
+			_packet << ServerMessage::Newmessage;
+			_packet << error;
+
+			int ret = sendPacket(_packet, socket);
 		}
 	}
 	else if (command.find("whisper") != std::string::npos)
 	{
+		bool found = false;
 		std::string remove_1 = "/whisper ";
 		command.erase(0, remove_1.size());
 
@@ -375,8 +395,8 @@ void ModuleNetworkingServer::executeCommand(std::string command, SOCKET socket)
 		{
 			if (command.find(connectedSockets[i].playerName) != std::string::npos)
 			{
-				std::string remove_2 = connectedSockets[i].playerName + " ";
-				command.erase(0, remove_2.size());
+				std::string remove_2 = connectedSockets[i].playerName;
+				command.erase(0, remove_2.size()+1);
 
 				OutputMemoryStream _packet;
 				_packet << ServerMessage::Newmessage;
@@ -385,9 +405,20 @@ void ModuleNetworkingServer::executeCommand(std::string command, SOCKET socket)
 				int ret = sendPacket(_packet, connectedSockets[i].socket);
 				if (ret == SOCKET_ERROR)
 				{
-					reportError("Error Sending Welcom Packet");
+					reportError("Welcome package commette not sed. ERROR");
 				}
+				found = true;
 			}
+		}
+		if (!found)
+		{
+			std::string error = "user not found. ERROR";
+			reportError("user not found. ERROR"); // server message
+			OutputMemoryStream _packet;
+			_packet << ServerMessage::Newmessage;
+			_packet << error;
+
+			int ret = sendPacket(_packet, socket);
 		}
 	}
 	else if (command.find("change_name") != std::string::npos)
@@ -408,7 +439,7 @@ void ModuleNetworkingServer::executeCommand(std::string command, SOCKET socket)
 				int ret = sendPacket(_packet, connectedSockets[i].socket);
 				if (ret == SOCKET_ERROR)
 				{
-					reportError("Error Sending Welcom Packet");
+					reportError("Welcome package commette not sed. ERROR");
 				}
 			}
 		}

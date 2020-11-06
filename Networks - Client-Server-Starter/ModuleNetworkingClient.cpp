@@ -50,7 +50,7 @@ bool ModuleNetworkingClient::isRunning() const
 	return state != ClientState::Stopped;
 }
 
-bool ModuleNetworkingClient::update() //updated
+bool ModuleNetworkingClient::update() //updated OK
 {
 	//if (state == ClientState::Start)
 	//{
@@ -64,17 +64,17 @@ bool ModuleNetworkingClient::update() //updated
 	//	}
 	//}
 
-	OutputMemoryStream packet;
+	OutputMemoryStream Package;
 
 	if (state == ClientState::Start)
 	{
 		// TODO(jesus): Send the player name to the server
-		//int ret = send(socketClient, playerName.c_str(), playerName.size(), 0); --------> Updated
+		//int ret = send(socketClient, playerName.c_str(), playerName.size(), 0); // Updated OK 
 
-		packet << ClientMessage::Hello;
-		packet << playerName;
+		Package << ClientMessage::Hello;
+		Package << playerName;
 
-		if (sendPacket(packet, Socket))
+		if (sendPacket(Package, Socket))
 		{
 			state = ClientState::Logging;
 		}
@@ -91,20 +91,20 @@ bool ModuleNetworkingClient::update() //updated
 		{
 			if (message[0] == '/')
 			{
-				DLOG("Executing comand %s", message.c_str());
-				packet << ClientMessage::Command;
+				Package << ClientMessage::Command;
+				DLOG("Command %s", message.c_str());
 			}
 			else
 			{
-				packet << ClientMessage::Send;
+				Package << ClientMessage::Send;
 			}
 
-			packet << message;
+			Package << message;
 
-			if (!sendPacket(packet, Socket))
+			if (!sendPacket(Package, Socket))
 			{
-				disconnect();
 				state = ClientState::Stopped;
+				disconnect();
 			}
 
 			message.clear();
@@ -133,9 +133,9 @@ bool ModuleNetworkingClient::gui()
 			shutdown(Socket, 2);
 		}
 
-		ImGui::BeginChild("Chat", ImVec2(375, 400), true);  //updated start
+		ImGui::BeginChild("Chat", ImVec2(375, 400), true);  //updated start OK
 
-		for (int i = 0; i < Messages.size(); ++i)
+		for (int i = 0; i < Messages.size(); ++i) //roger maybe auto
 		{
 			ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, Messages[i].color);
 			ImGui::Text("%s", Messages[i].message.c_str());
@@ -150,7 +150,7 @@ bool ModuleNetworkingClient::gui()
 			send = true;
 			std::string mymessage(buff);
 			message = mymessage;
-		} //updated finish
+		} //updated finish OK
 
 		ImGui::End();
 	}
@@ -161,17 +161,21 @@ bool ModuleNetworkingClient::gui()
 void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemoryStream &packet)
 {
 	//state = ClientState::Stopped;
-	//updated
+	//updated OK 
+
 	ServerMessage serverMessage;
 	packet >> serverMessage;
 
+	//roger maybe switch
+	//create state machine
+	//act depending on the server message
 	if (serverMessage == ServerMessage::Welcome)
 	{
 		std::string welcomeMessage;
 		packet >> welcomeMessage;
 
 		Message welcome;
-		welcome.color = { 0.0f,1.0f,0.0f,1.0f };
+		welcome.color = { 1.0f,0.0f,0.0f,1.0f };
 		welcome.message = welcomeMessage;
 
 		Messages.push_back(welcome);
@@ -216,7 +220,7 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 		packet >> newmessage;
 
 		Message new_message;
-		new_message.color = { 1.0f,0.0f,0.0f,1.0f };
+		new_message.color = { 1.0f,1.0f,0.0f,1.0f };
 		new_message.message = newmessage;
 
 		Messages.push_back(new_message);
@@ -250,8 +254,9 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
 {
-	//updated
-	state = ClientState::Stopped;
+	//updated OK
+	//Delete messages and stop state
 	Messages.clear();
+	state = ClientState::Stopped;
 }
 

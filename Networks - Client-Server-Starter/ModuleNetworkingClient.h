@@ -33,7 +33,7 @@ private:
 	//////////////////////////////////////////////////////////////////////
 
 	//void onSocketReceivedData(SOCKET socket, byte * data) override;
-	void onSocketReceivedData(SOCKET socket, const InputMemoryStream &packet) override; //updated
+	void onSocketReceivedData(SOCKET socket, const InputMemoryStream &packet) override; //updated OK
 
 	void onSocketDisconnected(SOCKET socket) override;
 
@@ -55,20 +55,21 @@ private:
 	sockaddr_in serverAddress = {};
 	//SOCKET Socket = INVALID_SOCKET;
 
-	//std::string playerName;
-
-	SOCKET Socket;  //updated start
-
+	SOCKET Socket;  //updated start OK
+	
+	//Message variables for chat
 	struct Message
 	{
-		ImVec4 color;
 		std::string message;
+		ImVec4 color;
 	};
-
+	//name
 	std::string playerName;
+	//grroup of messages
 	std::vector<Message> Messages;
+	//single message
 	std::string message;
-
-	bool send = false; //update finish
+	// control variable
+	bool send = false; //update finish OK
 };
 
