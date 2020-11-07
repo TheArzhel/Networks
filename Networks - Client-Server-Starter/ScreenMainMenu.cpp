@@ -54,10 +54,10 @@ void ScreenMainMenu::gui()
 	static char playerNameStr[64] = "Darth Vader";
 	ImGui::InputText("Player name", playerNameStr, sizeof(playerNameStr));
 	
-	static ImVec4 color = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+	/*static ImVec4 color = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
 	ImGui::Text("Choose Color Font"); ImGui::SameLine(); 
 	ImGui::ColorEdit4("MyColor##3", (float*)&color, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel );
-
+*/
 	if (ImGui::Button("Connect to Death Star server"))
 	{
 		App->modScreen->screenGame->isServer = false;

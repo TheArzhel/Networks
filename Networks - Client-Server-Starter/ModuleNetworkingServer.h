@@ -63,7 +63,7 @@ private:
 		sockaddr_in address;
 		SOCKET socket;
 		std::string playerName;
-		ImVec4 playerColor;
+		//ImVec4 playerColor;
 	};
 
 	//////////////////////////////////////////////////////////////////////

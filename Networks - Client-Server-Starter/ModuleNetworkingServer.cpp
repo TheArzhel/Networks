@@ -158,9 +158,9 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	if (clientMessage == ClientMessage::Hello)
 	{
 		std::string playername;
-		std::vector<float> color;
+		//std::vector<float> color;
 
-		packet >> color;
+		//packet >> color;
 		packet >> playername;
 		
 		bool notify = false;
