@@ -65,6 +65,7 @@ private:
 		std::string playerName;
 		//ImVec4 playerColor;
 		bool admin = false;
+		bool blocked = false;
 	};
 
 	//////////////////////////////////////////////////////////////////////

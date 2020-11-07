@@ -203,6 +203,9 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 		messageToSend.color = { 1.0f,1.0f,1.0f,1.0f };
 		messageToSend.message = messageData;
 
+		//do not puch message if its blocked
+		
+		
 		Messages.push_back(messageToSend);
 		break;
 

@@ -221,12 +221,16 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	if (clientMessage == ClientMessage::Send)
 	{
 		std::string playername;
-
+		bool blocked = false;
 		for (int i = 0; i < connectedSockets.size(); ++i)
 		{
 			if (connectedSockets[i].socket == socket)
 			{
 				playername = connectedSockets[i].playerName;
+				if (connectedSockets[i].blocked)
+				{
+					blocked = true;
+				}
 			}
 		}
 
@@ -241,12 +245,16 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 		for (int i = 0; i < connectedSockets.size(); ++i)
 		{
-			int ret = sendPacket(_packet, connectedSockets[i].socket);
-
-			if (ret == SOCKET_ERROR)
+			if (!blocked)
 			{
-				reportError("Welcome package commette not sed. ERROR");
+				int ret = sendPacket(_packet, connectedSockets[i].socket);
+				if (ret == SOCKET_ERROR)
+				{
+					reportError("Welcome package commette not sed. ERROR");
+				}
+
 			}
+
 		}
 	}
 
@@ -321,7 +329,7 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 		OutputMemoryStream _packet;
 		_packet << ServerMessage::Command;
 
-		std::string newuser_message = "Command list:\n /help \n /list \n /kick [name] \n /whisper [name] [message] \n /change_name [name] \n /admin \n /clear chat";
+		std::string newuser_message = "Command list:\n /help \n /list \n /kick [name] \n /whisper [name] [message] \n /change_name [name] \n /admin \n /clear chat \n /block [username]";
 		_packet << newuser_message;
 
 		int ret = sendPacket(_packet, socket);
@@ -525,6 +533,80 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 	{
 		reportError("deleting chat error. ERROR");
 	}
+	}
+	else if (command.find("block") != std::string::npos)
+	{
+		//OutputMemoryStream _packet;
+		//_packet << ServerMessage::Command;
+
+		//std::string newuser_message = "Users Blocked: ";
+
+		bool found = false;
+		bool admin = false;
+		//look to see if userkicking  is admin
+		for (int i = 0; i < connectedSockets.size(); i++)
+		{
+			if (connectedSockets[i].socket == socket)
+			{
+				if (connectedSockets[i].admin)
+					admin = true;
+			}
+
+		}
+		//look for player to block
+		for (int i = 0; i < connectedSockets.size(); i++)
+		{
+			if (command.find(connectedSockets[i].playerName) != std::string::npos && admin)
+			{
+				OutputMemoryStream _packet;
+				_packet << ServerMessage::Command;
+
+
+				std::string newuser_message = "Users Blocked: ";
+				connectedSockets[i].blocked = !connectedSockets[i].blocked;
+
+				
+				newuser_message = newuser_message + " - " + connectedSockets[i].playerName;
+
+				_packet << newuser_message;
+
+				int ret = sendPacket(_packet, socket);
+
+				//int ret = sendPacket(_packet, connectedSockets[i].socket);
+				if (ret == SOCKET_ERROR)
+				{
+					reportError("Trying to block. ERROR");
+				}
+				found = true;
+			}
+			if (command.find(connectedSockets[i].playerName) != std::string::npos && !admin)
+			{
+				OutputMemoryStream _packet;
+				_packet << ServerMessage::Command;
+
+				std::string newuser_message = "Admin priviledge needed";
+
+				_packet << newuser_message;
+
+				int ret = sendPacket(_packet, socket);
+				if (ret == SOCKET_ERROR)
+				{
+					reportError("block without admin. ERROR");
+				}
+				found = true;
+			}
+
+		}
+		if (!found)
+		{
+			std::string error = "user not found. ERROR";
+			reportError("user not found. ERROR"); // server message
+			OutputMemoryStream _packet;
+			_packet << ServerMessage::Newmessage;
+			_packet << error;
+
+			int ret = sendPacket(_packet, socket);
+		}
 	}
 }
 
