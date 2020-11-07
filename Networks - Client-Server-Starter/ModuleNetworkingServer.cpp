@@ -321,7 +321,7 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 		OutputMemoryStream _packet;
 		_packet << ServerMessage::Command;
 
-		std::string newuser_message = "Command list:\n /help \n /list \n /kick [name] \n /whisper [name] [message] \n /change_name [name]";
+		std::string newuser_message = "Command list:\n /help \n /list \n /kick [name] \n /whisper [name] [message] \n /change_name [name] \n /admin";
 		_packet << newuser_message;
 
 		int ret = sendPacket(_packet, socket);
@@ -357,9 +357,21 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 	else if (command.find("kick") != std::string::npos)
 	{
 		bool found = false;
+		bool admin = false;
+		//look to see if userkicking  is admin
 		for (int i = 0; i < connectedSockets.size(); i++)
 		{
-			if (command.find(connectedSockets[i].playerName) != std::string::npos)
+			if (connectedSockets[i].socket == socket)
+			{
+				if (connectedSockets[i].admin)
+					admin = true;
+			}
+
+		}
+		//look for player
+		for (int i = 0; i < connectedSockets.size(); i++)
+		{
+			if (command.find(connectedSockets[i].playerName) != std::string::npos && admin)
 			{
 				OutputMemoryStream _packet;
 				_packet << ServerMessage::ComDisconnect;
@@ -368,6 +380,22 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 				if (ret == SOCKET_ERROR)
 				{
 					reportError("Welcome package commette not sed. ERROR");
+				}
+				found = true;
+			}
+			if (command.find(connectedSockets[i].playerName) != std::string::npos && !admin)
+			{
+				OutputMemoryStream _packet;
+				_packet << ServerMessage::Command;
+
+				std::string newuser_message = "Admin priviledge needed";
+
+				_packet << newuser_message;
+
+				int ret = sendPacket(_packet, socket);
+				if (ret == SOCKET_ERROR)
+				{
+					reportError("kick without admin. ERROR");
 				}
 				found = true;
 			}
@@ -443,6 +471,33 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 			}
 		}
 
+	}
+	else if (command.find("admin") != std::string::npos)
+	{
+		OutputMemoryStream _packet;
+		_packet << ServerMessage::Command;
+
+		std::string newuser_message = "Users Admin: ";
+
+		for (int i = 0; i < connectedSockets.size(); i++)
+		{
+			if (connectedSockets[i].socket == socket)
+			{
+				connectedSockets[i].admin = !connectedSockets[i].admin;
+				if (connectedSockets[i].admin)
+				newuser_message = newuser_message + " - " + connectedSockets[i].playerName;
+
+			}
+
+		}
+
+		_packet << newuser_message;
+
+		int ret = sendPacket(_packet, socket);
+		if (ret == SOCKET_ERROR)
+		{
+			reportError("Admin. ERROR");
+		}
 	}
 }
 

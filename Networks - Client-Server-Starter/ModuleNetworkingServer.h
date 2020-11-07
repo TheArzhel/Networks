@@ -64,6 +64,7 @@ private:
 		SOCKET socket;
 		std::string playerName;
 		//ImVec4 playerColor;
+		bool admin = false;
 	};
 
 	//////////////////////////////////////////////////////////////////////
