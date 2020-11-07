@@ -492,11 +492,12 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 			if (connectedSockets[i].socket == socket)
 			{
 				connectedSockets[i].admin = !connectedSockets[i].admin;
-				if (connectedSockets[i].admin)
-				newuser_message = newuser_message + " - " + connectedSockets[i].playerName;
+			}
+			if (connectedSockets[i].admin)
+			{
+				newuser_message = newuser_message + "\n - " + connectedSockets[i].playerName;
 
 			}
-
 		}
 
 		_packet << newuser_message;
@@ -539,10 +540,12 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 		//OutputMemoryStream _packet;
 		//_packet << ServerMessage::Command;
 
-		//std::string newuser_message = "Users Blocked: ";
 
 		bool found = false;
 		bool admin = false;
+
+		
+
 		//look to see if userkicking  is admin
 		for (int i = 0; i < connectedSockets.size(); i++)
 		{
@@ -560,23 +563,8 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 			{
 				OutputMemoryStream _packet;
 				_packet << ServerMessage::Command;
-
-
-				std::string newuser_message = "Users Blocked: ";
 				connectedSockets[i].blocked = !connectedSockets[i].blocked;
 
-				
-				newuser_message = newuser_message + " - " + connectedSockets[i].playerName;
-
-				_packet << newuser_message;
-
-				int ret = sendPacket(_packet, socket);
-
-				//int ret = sendPacket(_packet, connectedSockets[i].socket);
-				if (ret == SOCKET_ERROR)
-				{
-					reportError("Trying to block. ERROR");
-				}
 				found = true;
 			}
 			if (command.find(connectedSockets[i].playerName) != std::string::npos && !admin)
@@ -595,8 +583,11 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 				}
 				found = true;
 			}
-
+			
+			
+			
 		}
+		
 		if (!found)
 		{
 			std::string error = "user not found. ERROR";
@@ -606,6 +597,31 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 			_packet << error;
 
 			int ret = sendPacket(_packet, socket);
+		}
+
+		//print blocked list
+		OutputMemoryStream _packet;
+		_packet << ServerMessage::Command;
+
+
+		std::string newuser_message = "Users Blocked: ";
+
+		for (int i = 0; i < connectedSockets.size(); i++)
+		{
+
+			if (connectedSockets[i].blocked)
+			{
+				newuser_message = newuser_message + "\n - " + connectedSockets[i].playerName;
+
+			}
+		}
+
+		_packet << newuser_message;
+
+		int ret = sendPacket(_packet, socket);
+		if (ret == SOCKET_ERROR)
+		{
+			reportError("block list. ERROR");
 		}
 	}
 }
