@@ -70,6 +70,7 @@ private:
 	//single message
 	std::string message;
 	// control variable
+	ImVec4 playerColor;
 	bool send = false; //update finish OK
 };
 

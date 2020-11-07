@@ -125,6 +125,7 @@ bool ModuleNetworkingClient::gui()
 		Texture *tex = App->modResources->client;
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
 		ImGui::Image(tex->shaderResource, texSize);
+		ImGui::SetKeyboardFocusHere();
 
 		ImGui::Text("%s connected to the server...", playerName.c_str());
 		if (ImGui::Button("Disconect"))
@@ -135,7 +136,7 @@ bool ModuleNetworkingClient::gui()
 
 		ImGui::BeginChild("Chat", ImVec2(375, 400), true);  //updated start OK
 
-		for (int i = 0; i < Messages.size(); ++i) //roger maybe auto
+		for (int i = 0; i < Messages.size(); ++i) 
 		{
 			ImGui::PushStyleColor(ImGuiCol_::ImGuiCol_Text, Messages[i].color);
 			ImGui::Text("%s", Messages[i].message.c_str());
@@ -166,88 +167,78 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	ServerMessage serverMessage;
 	packet >> serverMessage;
 
-	//roger maybe switch
 	//create state machine
 	//act depending on the server message
-	if (serverMessage == ServerMessage::Welcome)
+	std::string messageData;
+	Message messageToSend;
+	switch (serverMessage)
 	{
-		std::string welcomeMessage;
-		packet >> welcomeMessage;
+	case ServerMessage::Welcome:
 
-		Message welcome;
-		welcome.color = { 1.0f,0.0f,0.0f,1.0f };
-		welcome.message = welcomeMessage;
+		packet >> messageData;
+		messageToSend.color = { 1.0f,0.0f,0.0f,1.0f };
+		messageToSend.message = messageData;
+		Messages.push_back(messageToSend);
+		break;
 
-		Messages.push_back(welcome);
-	}
-	else if (serverMessage == ServerMessage::Unwelcome)
-	{
-		std::string unwelcomeMessage;
-		packet >> unwelcomeMessage;
+	case ServerMessage::Unwelcome:
 
+		packet >> messageData;
 		disconnect();
 		state = ClientState::Stopped;
+		WLOG("%s", messageData.c_str());
+		break;
 
-		WLOG("%s", unwelcomeMessage.c_str());
+	case ServerMessage::Newuser:
 
-		//Messages.push_back(unwelcomeMessage);
-	}
-	else if (serverMessage == ServerMessage::Newuser)
-	{
-		std::string newusermessage;
-		packet >> newusermessage;
+		packet >> messageData;
+		messageToSend.color = { 0.0f,0.0f,1.0f,1.0f };
+		messageToSend.message = messageData;
+		Messages.push_back(messageToSend);
+		break;
 
-		Message newuser;
-		newuser.color = { 0.0f,0.0f,1.0f,1.0f };
-		newuser.message = newusermessage;
+	case ServerMessage::Newmessage:
 
-		Messages.push_back(newuser);
-	}
-	else if (serverMessage == ServerMessage::Newmessage)
-	{
-		std::string newmessage;
-		packet >> newmessage;
+		packet >> messageData;
+		messageToSend.color = { 1.0f,1.0f,1.0f,1.0f };
+		messageToSend.message = messageData;
 
-		Message new_message;
-		new_message.color = { 1.0f,1.0f,1.0f,1.0f };
-		new_message.message = newmessage;
+		Messages.push_back(messageToSend);
+		break;
 
-		Messages.push_back(new_message);
-	}
-	else if (serverMessage == ServerMessage::Userdisconnected)
-	{
-		std::string newmessage;
-		packet >> newmessage;
+	case ServerMessage::Userdisconnected:
 
-		Message new_message;
-		new_message.color = { 1.0f,1.0f,0.0f,1.0f };
-		new_message.message = newmessage;
+		packet >> messageData;
 
-		Messages.push_back(new_message);
-	}
-	else if (serverMessage == ServerMessage::Command)
-	{
-		std::string newmessage;
-		packet >> newmessage;
+		messageToSend.color = { 1.0f,1.0f,0.0f,1.0f };
+		messageToSend.message = messageData;
+		Messages.push_back(messageToSend);
+		break;
 
-		Message new_message;
-		new_message.color = { 1.0f,1.0f,0.0f,1.0f };
-		new_message.message = newmessage;
+	case ServerMessage::Command:
 
-		Messages.push_back(new_message);
-	}
-	else if (serverMessage == ServerMessage::ComDisconnect)
-	{
+		packet >> messageData;
+
+		messageToSend.color = { 1.0f,1.0f,0.0f,1.0f };
+		messageToSend.message = messageData;
+		Messages.push_back(messageToSend);
+		break;
+
+	case ServerMessage::ComDisconnect:
+
 		onSocketDisconnected(Socket);
 		shutdown(Socket, 2);
 		disconnect();
-	}
-	else if (serverMessage == ServerMessage::NewName)
-	{
-		std::string newname;
-		packet >> newname;
+		break;
 
-		playerName = newname;
+	case ServerMessage::NewName:
+
+		packet >> messageData;
+		playerName = messageData;
+		break;
+
+	default:
+		break;
 	}
 
 }

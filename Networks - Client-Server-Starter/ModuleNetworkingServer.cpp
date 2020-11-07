@@ -1,8 +1,6 @@
 ﻿#include "ModuleNetworkingServer.h"
 
 
-
-
 //////////////////////////////////////////////////////////////////////
 // ModuleNetworkingServer public methods
 //////////////////////////////////////////////////////////////////////
@@ -155,17 +153,18 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	ClientMessage clientMessage;
 	packet >> clientMessage;
 
-	//roger maybe switch
 	// create state machine
 	//act depending on the client message
 	if (clientMessage == ClientMessage::Hello)
 	{
 		std::string playername;
-		packet >> playername;
+		std::vector<float> color;
 
+		packet >> color;
+		packet >> playername;
+		
 		bool notify = false;
 
-		//roger maybe auto
 		for (int i = 0; i < connectedSockets.size(); ++i)
 		{
 			if (connectedSockets[i].socket == socket)
@@ -177,6 +176,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				{
 					_packet << ServerMessage::Welcome;
 					connectedSockets[i].playerName = playername;
+					//connectedSockets[i].playerColor = color;
 					welcom_message = "Welcome To The Death Star server!";
 					notify = true;
 				}
@@ -198,7 +198,6 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		}
 		if (notify)
 		{
-			//Roger maybe auto
 			for (int i = 0; i < connectedSockets.size(); ++i)
 			{
 				if (connectedSockets[i].socket != socket)
@@ -288,10 +287,10 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 
 	std::string text = playername + " left The battle. May the Force be with you";
 	_packet << text;
-	//Roger maybe auto
-	for (int i = 0; i < connectedSockets.size(); ++i)
+
+	for (auto s : connectedSockets) 
 	{
-		int ret = sendPacket(_packet, connectedSockets[i].socket);
+		int ret = sendPacket(_packet, s.socket);
 
 		if (ret == SOCKET_ERROR)
 		{
@@ -304,10 +303,10 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 
 bool ModuleNetworkingServer::CheckName(std::string name)
 {
-	//roger maybe auto
-	for (int i = 0; i < connectedSockets.size(); ++i)
+
+	for (auto s : connectedSockets)
 	{
-		if (name == connectedSockets[i].playerName)
+		if (name == s.playerName)
 		{
 			return false;
 		}

@@ -16,6 +16,8 @@ void ScreenMainMenu::enable()
 
 void ScreenMainMenu::gui()
 {
+	ImGui::ShowDemoWindow();
+
 	ImGui::Begin("Main Menu");
 	
 	Texture *banner = App->modResources->banner;
@@ -23,6 +25,7 @@ void ScreenMainMenu::gui()
 	ImGui::Image(banner->shaderResource, bannerSize);
 
 	ImGui::Spacing();
+
 
 	ImGui::Text("Server");
 
@@ -50,6 +53,10 @@ void ScreenMainMenu::gui()
 
 	static char playerNameStr[64] = "Darth Vader";
 	ImGui::InputText("Player name", playerNameStr, sizeof(playerNameStr));
+	
+	static ImVec4 color = ImVec4(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f);
+	ImGui::Text("Choose Color Font"); ImGui::SameLine(); 
+	ImGui::ColorEdit4("MyColor##3", (float*)&color, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel );
 
 	if (ImGui::Button("Connect to Death Star server"))
 	{
@@ -57,6 +64,7 @@ void ScreenMainMenu::gui()
 		App->modScreen->screenGame->serverPort = remoteServerPort;
 		App->modScreen->screenGame->serverAddress = serverAddressStr;
 		App->modScreen->screenGame->playerName = playerNameStr;
+		//App->modScreen->screenGame->VecColor = std::vector<float>{color.x,color.y,color.z,color.w };
 		App->modScreen->swapScreensWithTransition(this, App->modScreen->screenGame);
 	}
 

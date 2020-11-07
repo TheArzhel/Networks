@@ -84,6 +84,7 @@ public:
 		Write( inString.data(), elementCount * sizeof( char ) );
 	}
 
+
 	// Write for C strings
 	void Write(const char *inString)
 	{
