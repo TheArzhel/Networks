@@ -1,10 +1,11 @@
 ﻿#include "ModuleNetworkingClient.h"
 
 
-bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPort, const char *pplayerName)
+bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPort, const char *pplayerName,std::vector<float> colorName)
 {
 	int ret = 0;
 	playerName = pplayerName;
+	vecColor = colorName;
 
 	// TODO(jesus): TCP connection stuff
 	// Create the socket
@@ -66,6 +67,7 @@ bool ModuleNetworkingClient::update() //updated OK
 
 	OutputMemoryStream Package;
 
+
 	if (state == ClientState::Start)
 	{
 		// TODO(jesus): Send the player name to the server
@@ -73,7 +75,8 @@ bool ModuleNetworkingClient::update() //updated OK
 
 		Package << ClientMessage::Hello;
 		Package << playerName;
-
+		Package << vecColor;
+		colorText = { vecColor[0], vecColor[1], vecColor[2], vecColor[3] };
 		if (sendPacket(Package, Socket))
 		{
 			state = ClientState::Logging;
@@ -100,6 +103,7 @@ bool ModuleNetworkingClient::update() //updated OK
 			}
 
 			Package << message;
+			Package << vecColor;
 
 			if (!sendPacket(Package, Socket))
 			{
@@ -125,7 +129,7 @@ bool ModuleNetworkingClient::gui()
 		Texture *tex = App->modResources->client;
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
 		ImGui::Image(tex->shaderResource, texSize);
-		ImGui::SetKeyboardFocusHere();
+		//ImGui::SetKeyboardFocusHere();
 
 		ImGui::Text("%s connected to the server...", playerName.c_str());
 		if (ImGui::Button("Disconect"))
@@ -153,11 +157,27 @@ bool ModuleNetworkingClient::gui()
 			message = mymessage;
 		} //updated finish OK
 
+		
+		
+		if (state == ClientState::Logging)
+		{
+			//static ImVec4 color = colorText;
+			ImGui::SameLine();
+			ImGui::ColorEdit4("MyColor##13", (float*)&colorText, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+			
+			vecColor = std::vector<float>{ colorText.x,colorText.y,colorText.z,colorText.w };
+		}
+		
+
 		ImGui::End();
 	}
 
 	return true;
 }
+
+void ChangeColorChat() {
+
+};
 
 void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemoryStream &packet)
 {
@@ -170,12 +190,15 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	//create state machine
 	//act depending on the server message
 	std::string messageData;
+	ImVec4 color;
+
 	Message messageToSend;
 	switch (serverMessage)
 	{
 	case ServerMessage::Welcome:
 
 		packet >> messageData;
+
 		messageToSend.color = { 1.0f,0.0f,0.0f,1.0f };
 		messageToSend.message = messageData;
 		Messages.push_back(messageToSend);
@@ -200,7 +223,9 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	case ServerMessage::Newmessage:
 
 		packet >> messageData;
-		messageToSend.color = { 1.0f,1.0f,1.0f,1.0f };
+		packet >> vecColor;
+		color = { vecColor[0],vecColor[1], vecColor[2], vecColor[3] };
+		messageToSend.color = color;
 		messageToSend.message = messageData;
 
 		//do not puch message if its blocked

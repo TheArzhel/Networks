@@ -10,7 +10,7 @@ public:
 	// ModuleNetworkingClient public methods
 	//////////////////////////////////////////////////////////////////////
 
-	bool start(const char *serverAddress, int serverPort, const char *playerName);
+	bool start(const char *serverAddress, int serverPort, const char *playerName, std::vector<float> colorName);
 
 	bool isRunning() const;
 
@@ -37,7 +37,7 @@ private:
 
 	void onSocketDisconnected(SOCKET socket) override;
 	void deleteChat();
-
+	void ChangeColorChat();
 
 	//////////////////////////////////////////////////////////////////////
 	// Client state
@@ -70,7 +70,8 @@ private:
 	//single message
 	std::string message;
 	// control variable
-	// ImVec4 playerColor;
+	std::vector<float> vecColor;
+	ImVec4 colorText;
 	bool send = false; //update finish OK
 };
 

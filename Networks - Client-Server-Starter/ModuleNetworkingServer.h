@@ -63,7 +63,7 @@ private:
 		sockaddr_in address;
 		SOCKET socket;
 		std::string playerName;
-		//ImVec4 playerColor;
+		std::vector<float> playerColor;
 		bool admin = false;
 		bool blocked = false;
 	};

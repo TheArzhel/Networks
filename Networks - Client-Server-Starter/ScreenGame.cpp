@@ -11,7 +11,7 @@ void ScreenGame::enable()
 	}
 	else
 	{
-		if (!App->modNetClient->start(serverAddress, serverPort, playerName))
+		if (!App->modNetClient->start(serverAddress, serverPort, playerName,VecColor))
 		{
 			WLOG("Could not start ModuleNetworkingClient");
 		}

@@ -149,7 +149,6 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 	// updated OK
 
-
 	ClientMessage clientMessage;
 	packet >> clientMessage;
 
@@ -158,11 +157,11 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	if (clientMessage == ClientMessage::Hello)
 	{
 		std::string playername;
-		//std::vector<float> color;
-
-		//packet >> color;
+		std::vector<float> color;
+	
 		packet >> playername;
-		
+		packet >> color;
+
 		bool notify = false;
 
 		for (int i = 0; i < connectedSockets.size(); ++i)
@@ -176,7 +175,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				{
 					_packet << ServerMessage::Welcome;
 					connectedSockets[i].playerName = playername;
-					//connectedSockets[i].playerColor = color;
+					connectedSockets[i].playerColor = color;
 					welcom_message = "Welcome To The Death Star server!";
 					notify = true;
 				}
@@ -217,16 +216,17 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 			}
 		}
 	}
-
 	if (clientMessage == ClientMessage::Send)
 	{
 		std::string playername;
+		std::vector <float> textcolor;
 		bool blocked = false;
 		for (int i = 0; i < connectedSockets.size(); ++i)
 		{
 			if (connectedSockets[i].socket == socket)
 			{
 				playername = connectedSockets[i].playerName;
+				textcolor = connectedSockets[i].playerColor;
 				if (connectedSockets[i].blocked)
 				{
 					blocked = true;
@@ -236,12 +236,14 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 
 		std::string message;
 		packet >> message;
+		packet >> textcolor;
 
 		OutputMemoryStream _packet;
 		_packet << ServerMessage::Newmessage;
 
 		std::string text = playername + ": " + message;
 		_packet << text;
+		_packet << textcolor;
 
 		for (int i = 0; i < connectedSockets.size(); ++i)
 		{
@@ -252,9 +254,7 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				{
 					reportError("Welcome package commette not sed. ERROR");
 				}
-
 			}
-
 		}
 	}
 
