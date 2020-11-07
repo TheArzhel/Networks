@@ -36,7 +36,7 @@ private:
 	void onSocketReceivedData(SOCKET socket, const InputMemoryStream &packet) override; //updated OK
 
 	void onSocketDisconnected(SOCKET socket) override;
-
+	void deleteChat();
 
 
 	//////////////////////////////////////////////////////////////////////

@@ -224,6 +224,18 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 		Messages.push_back(messageToSend);
 		break;
 
+	case ServerMessage::Delete:
+
+		packet >> messageData;
+
+		deleteChat();
+
+		messageToSend.color = { 1.0f,1.0f,0.0f,1.0f };
+		messageToSend.message = messageData;
+		Messages.push_back(messageToSend);
+
+		break;
+
 	case ServerMessage::ComDisconnect:
 
 		onSocketDisconnected(Socket);
@@ -251,3 +263,8 @@ void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
 	state = ClientState::Stopped;
 }
 
+void ModuleNetworkingClient::deleteChat()
+{
+	//Delete messages and stop state
+	Messages.clear();
+}

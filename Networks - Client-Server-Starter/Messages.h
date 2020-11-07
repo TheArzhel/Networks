@@ -20,6 +20,7 @@ enum class ServerMessage
 	Userdisconnected,
 	Command,
 	ComDisconnect,
-	NewName
+	NewName,
+	Delete
 };
 

@@ -321,7 +321,7 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 		OutputMemoryStream _packet;
 		_packet << ServerMessage::Command;
 
-		std::string newuser_message = "Command list:\n /help \n /list \n /kick [name] \n /whisper [name] [message] \n /change_name [name] \n /admin";
+		std::string newuser_message = "Command list:\n /help \n /list \n /kick [name] \n /whisper [name] [message] \n /change_name [name] \n /admin \n /clear chat";
 		_packet << newuser_message;
 
 		int ret = sendPacket(_packet, socket);
@@ -498,6 +498,33 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 		{
 			reportError("Admin. ERROR");
 		}
+	}
+	else if (command.find("clear chat") != std::string::npos)
+	{
+	OutputMemoryStream _packet;
+	_packet << ServerMessage::Delete;
+
+	std::string newuser_message = "Delete chat ";
+
+	/*for (int i = 0; i < connectedSockets.size(); i++)
+	{
+		if (connectedSockets[i].socket == socket)
+		{
+			connectedSockets[i].admin = !connectedSockets[i].admin;
+			if (connectedSockets[i].admin)
+				newuser_message = newuser_message + " - " + connectedSockets[i].playerName;
+
+		}
+
+	}*/
+
+	_packet << newuser_message;
+
+	int ret = sendPacket(_packet, socket);
+	if (ret == SOCKET_ERROR)
+	{
+		reportError("deleting chat error. ERROR");
+	}
 	}
 }
 
