@@ -324,6 +324,8 @@ bool ModuleNetworkingServer::CheckName(std::string name)
 
 void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket)
 {
+		std::vector<float> vecColorStandar;
+		vecColorStandar = { 1.0f,1.0f,1.0f,1.0f };
 	if (command.find("help") != std::string::npos)
 	{
 		OutputMemoryStream _packet;
@@ -355,6 +357,7 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 		}
 
 		_packet << newuser_message;
+	//	_packet << vecColorStandar;
 
 		int ret = sendPacket(_packet, socket);
 		if (ret == SOCKET_ERROR)
@@ -366,6 +369,7 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 	{
 		bool found = false;
 		bool admin = false;
+
 		//look to see if userkicking  is admin
 		for (int i = 0; i < connectedSockets.size(); i++)
 		{
@@ -416,6 +420,7 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 			OutputMemoryStream _packet;
 			_packet << ServerMessage::Newmessage;
 			_packet << error;
+			_packet << vecColorStandar;
 
 			int ret = sendPacket(_packet, socket);
 		}
@@ -436,6 +441,7 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 				OutputMemoryStream _packet;
 				_packet << ServerMessage::Newmessage;
 				_packet << command;
+				_packet << vecColorStandar;
 
 				int ret = sendPacket(_packet, connectedSockets[i].socket);
 				if (ret == SOCKET_ERROR)
@@ -452,6 +458,7 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 			OutputMemoryStream _packet;
 			_packet << ServerMessage::Newmessage;
 			_packet << error;
+			_packet << vecColorStandar;
 
 			int ret = sendPacket(_packet, socket);
 		}
@@ -639,7 +646,7 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 			OutputMemoryStream _packet;
 			_packet << ServerMessage::Newmessage;
 			_packet << error;
-
+			_packet << vecColorStandar;
 			int ret = sendPacket(_packet, socket);
 		}
 
@@ -726,6 +733,7 @@ void ModuleNetworkingServer::CommandToExecute(std::string command, SOCKET socket
 		OutputMemoryStream _packet;
 		_packet << ServerMessage::Newmessage;
 		_packet << error;
+		_packet << vecColorStandar;
 
 		int ret = sendPacket(_packet, socket);
 	}
