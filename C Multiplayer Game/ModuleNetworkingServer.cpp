@@ -1,5 +1,5 @@
 #include "ModuleNetworkingServer.h"
-
+#include "Networks.h"
 
 
 //////////////////////////////////////////////////////////////////////
@@ -47,6 +47,15 @@ void ModuleNetworkingServer::onGui()
 		ImGui::Text(" - Disconnection timeout (s): %f", DISCONNECT_TIMEOUT_SECONDS);
 
 		ImGui::Separator();
+
+		//new
+		ImGui::Separator();
+
+		ImGui::Text("Replication");
+		ImGui::InputFloat("Delivery interval (s)", &replicationDeliveryIntervalSeconds, 0.01f, 0.1f);
+
+		ImGui::Separator();
+		//
 
 		if (state == ServerState::Listening)
 		{
@@ -189,6 +198,11 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 		}
 
 		// TODO(you): UDP virtual connection lab session
+		// new
+		if (proxy != nullptr)
+		{
+			proxy->lastPacketReceivedTime = Time.time;
+		}
 	}
 }
 
@@ -212,6 +226,8 @@ void ModuleNetworkingServer::onUpdate()
 
 		for (ClientProxy &clientProxy : clientProxies)
 		{
+			bool sendPing = (Time.time > secondsSinceLastPing + PING_INTERVAL_SECONDS) ? true : false;
+
 			if (clientProxy.connected)
 			{
 				// TODO(you): UDP virtual connection lab session
@@ -225,6 +241,27 @@ void ModuleNetworkingServer::onUpdate()
 				// TODO(you): World state replication lab session
 
 				// TODO(you): Reliability on top of UDP lab session
+
+				if (Time.time > clientProxy.lastPacketReceivedTime + DISCONNECT_TIMEOUT_SECONDS)
+				{
+					destroyClientProxy(&clientProxy);
+					WLOG("Did not revived anything client");
+					continue;
+				}
+
+				//OutputMemoryStream packet;
+				//packet << ServerMessage::Replication;
+
+				// TODO(jesus): If the replication interval passed and the replication manager of this proxy
+				//              has pending data, write and send a replication packet to this client.
+
+				if (sendPing && state != ServerState::Stopped)
+				{
+					OutputMemoryStream pingpacket;
+					pingpacket << ServerMessage::Ping;
+
+					sendPacket(pingpacket, clientProxy.address);
+				}
 			}
 		}
 	}
@@ -346,6 +383,34 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initi
 	return gameObject;
 }
 
+GameObject * ModuleNetworkingServer::spawnBullet(GameObject *parent)
+{
+	// Create a new game object with the player properties
+	GameObject *gameObject = Instantiate();
+	gameObject->size = { 20, 60 };
+	gameObject->angle = parent->angle;
+	gameObject->position = parent->position;
+	//gameObject->texture = App->modResources->laser;
+	gameObject->collider = App->modCollision->addCollider(ColliderType::Laser, gameObject);
+
+	// Create behaviour
+	gameObject->behaviour = new Laser;
+	gameObject->behaviour->gameObject = gameObject;
+
+	// Assign a new network identity to the object
+	App->modLinkingContext->registerNetworkGameObject(gameObject);
+
+	// Notify all client proxies' replication manager to create the object remotely
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if (clientProxies[i].connected)
+		{
+			// TODO(jesus): Notify this proxy's replication manager about the creation of this game object
+		}
+	}
+
+	return gameObject;
+}
 
 //////////////////////////////////////////////////////////////////////
 // Update / destruction

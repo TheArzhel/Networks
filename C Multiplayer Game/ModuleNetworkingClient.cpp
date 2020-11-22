@@ -51,6 +51,10 @@ void ModuleNetworkingClient::onStart()
 
 	secondsSinceLastHello = 9999.0f;
 	secondsSinceLastInputDelivery = 0.0f;
+	//new
+	secondsSinceLastPing = 0.0f;
+	lastPacketReceivedTime = Time.time;
+
 }
 
 void ModuleNetworkingClient::onGui()
@@ -103,6 +107,7 @@ void ModuleNetworkingClient::onGui()
 void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, const sockaddr_in &fromAddress)
 {
 	// TODO(you): UDP virtual connection lab session
+	lastPacketReceivedTime = Time.time;
 
 	uint32 protoId;
 	packet >> protoId;
@@ -205,6 +210,21 @@ void ModuleNetworkingClient::onUpdate()
 		}
 
 		// TODO(you): Latency management lab session
+		if (Time.time > lastPacketReceivedTime + DISCONNECT_TIMEOUT_SECONDS)
+		{
+			disconnect();
+			WLOG("Did not revived Ping from the server");
+		}
+
+		if (Time.time > secondsSinceLastPing + PING_INTERVAL_SECONDS && state != ClientState::Stopped)
+		{
+			secondsSinceLastPing = Time.time;
+
+			OutputMemoryStream packet;
+			packet << ClientMessage::Ping;
+
+			sendPacket(packet, serverAddress);
+		}
 
 		// Update camera for player
 		GameObject *playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);

@@ -43,7 +43,7 @@ private:
 	//////////////////////////////////////////////////////////////////////
 
 	enum class ClientState
-	{
+	{ //dif
 		Stopped,
 		Connecting,
 		Connected
@@ -78,6 +78,12 @@ private:
 	float inputDeliveryIntervalSeconds = 0.05f;
 	float secondsSinceLastInputDelivery = 0.0f;
 
+	//pings TODO
+	//new
+
+	// Timeout / ping
+	double lastPacketReceivedTime = 0.0f; 
+	float secondsSinceLastPing = 0.0f;    
 
 
 	//////////////////////////////////////////////////////////////////////
