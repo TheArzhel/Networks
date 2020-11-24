@@ -39,6 +39,8 @@ void ReplicationManagerClient::read(const InputMemoryStream & packet)
 			packet >> object->size.y;
 			packet >> texture;
 
+			object->sprite = App->modRender->addSprite(object);
+			object->sprite->order = 5;
 			object->sprite->texture = App->modTextures->loadTexture(texture.c_str());
 
 		}
