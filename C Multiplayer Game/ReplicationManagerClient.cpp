@@ -39,7 +39,7 @@ void ReplicationManagerClient::read(const InputMemoryStream & packet)
 			packet >> object->size.y;
 			packet >> texture;
 
-			object->texture = App->modTextures->loadTexture(texture.c_str());
+			object->sprite->texture = App->modTextures->loadTexture(texture.c_str());
 
 		}
 		else if (action == ReplicationAction::Update)
