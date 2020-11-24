@@ -232,24 +232,56 @@ void ModuleNetworkingServer::onUpdate()
 		{
 			if (clientProxy.connected)
 			{
+				// TODO(you): UDP virtual connection lab session
 				if (Time.time > clientProxy.lastPacketReceivedTime + DISCONNECT_TIMEOUT_SECONDS)
 				{
 					onConnectionReset(clientProxy.address);
 					WLOG("Did not revived anything client"); //cambiar texto
 					continue;
 				}
-				// TODO(you): UDP virtual connection lab session
 
+				// TODO(you): World state replication lab session
 				// Don't let the client proxy point to a destroyed game object
 				if (!IsValid(clientProxy.gameObject))
 				{
 					clientProxy.gameObject = nullptr;
 				}
 
-				// TODO(you): World state replication lab session
+				//if (clientProxy.replicationServer.replicationCommands.size() > 0 && Time.time > clientProxy.secondsSinceLastReplication + replicationDeliveryIntervalSeconds)
+				//{
+				//	Delivery* newDelivery = nullptr;
+				//
+				//	clientProxy.secondsSinceLastReplication = Time.time;
+				//
+				//	//We have to do it before the write in order to have the sequence number first
+				//	newDelivery = clientProxy.deliveryManager.writeSequenceNumber(packet);
+				//	newDelivery->delegate = new DeliveryDelegateReplication();
+				//
+				//	clientProxy.replicationServer.write(packet, newDelivery);
+				//
+				//	sendPacket(packet, clientProxy.address);
+				//}
 
+				if (sendPing && state != ServerState::Stopped)
+				{
+					OutputMemoryStream pingpacket;
+					pingpacket << ServerMessage::Ping;
+
+					//Sending next Expected Input Sequence to reset the input queue
+					pingpacket << clientProxy.nextExpectedInputSequenceNumber;
+
+					sendPacket(pingpacket, clientProxy.address);
+				}
+
+				//Check for timeouts
+				//clientProxy.deliveryManager.processTimedOutPackets();
+				
 				// TODO(you): Reliability on top of UDP lab session
 			}
+		}
+		if (sendPing)
+		{
+			secondsSinceLastHello = Time.time;
 		}
 	}
 }
