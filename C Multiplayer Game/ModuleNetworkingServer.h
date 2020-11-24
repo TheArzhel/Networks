@@ -51,7 +51,11 @@ private:
 		GameObject *gameObject = nullptr;
 
 		double lastPacketReceivedTime = 0.0f; // cambiar variable
+		float secondsSinceLastReplication = 0.0f; //cambiar Variable
 		// TODO(you): UDP virtual connection lab session
+		ReplicationManagerServer replicationServer;// cambiar variable
+		DeliveryManager deilveryManager;// cambiar variable
+
 		// TODO(you): World state replication lab session
 		// TODO(you): Reliability on top of UDP lab session
 
@@ -126,7 +130,8 @@ private:
 
 	float secondsSinceLastHello = 0.0f;
 
-	//float replicationDeliveryIntervalSeconds = 0.1f;
+	float replicationDeliveryIntervalSeconds = 0.1f; //cambiar Variable
+
 };
 
 

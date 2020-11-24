@@ -151,6 +151,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					GameObject *gameObject = networkGameObjects[i];
 					
 					// TODO(you): World state replication lab session
+					proxy->replicationServer.create(gameObject->networkId);
 				}
 
 				LOG("Message received: hello - from player %s", proxy->name.c_str());
@@ -194,7 +195,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 		}
 		else if (message == ClientMessage::Ping)
 		{
-			//proxy->deliveryManager.processAckdSequenceNumbers(packet);
+			proxy->deilveryManager.processAckdSequenceNumbers(packet);
 		}
 		// TODO(you): UDP virtual connection lab session
 		if (proxy != nullptr)
@@ -240,6 +241,10 @@ void ModuleNetworkingServer::onUpdate()
 					continue;
 				}
 
+				OutputMemoryStream packet;
+				packet << PROTOCOL_ID;
+				packet << ServerMessage::Replication;
+
 				// TODO(you): World state replication lab session
 				// Don't let the client proxy point to a destroyed game object
 				if (!IsValid(clientProxy.gameObject))
@@ -247,20 +252,20 @@ void ModuleNetworkingServer::onUpdate()
 					clientProxy.gameObject = nullptr;
 				}
 
-				//if (clientProxy.replicationServer.replicationCommands.size() > 0 && Time.time > clientProxy.secondsSinceLastReplication + replicationDeliveryIntervalSeconds)
-				//{
-				//	Delivery* newDelivery = nullptr;
-				//
-				//	clientProxy.secondsSinceLastReplication = Time.time;
-				//
-				//	//We have to do it before the write in order to have the sequence number first
-				//	newDelivery = clientProxy.deliveryManager.writeSequenceNumber(packet);
-				//	newDelivery->delegate = new DeliveryDelegateReplication();
-				//
-				//	clientProxy.replicationServer.write(packet, newDelivery);
-				//
-				//	sendPacket(packet, clientProxy.address);
-				//}
+				if (clientProxy.replicationServer.replicationCommands.size() > 0 && Time.time > clientProxy.secondsSinceLastReplication + replicationDeliveryIntervalSeconds)
+				{
+					Delivery* newDelivery = nullptr;
+				
+					clientProxy.secondsSinceLastReplication = Time.time;
+				
+					//We have to do it before the write in order to have the sequence number first
+					newDelivery = clientProxy.deilveryManager.writeSequenceNumber(packet);
+					newDelivery->delegate = new DeliveryDelegateReplication();
+				
+					clientProxy.replicationServer.write(packet, newDelivery);
+				
+					sendPacket(packet, clientProxy.address);
+				}
 
 				if (sendPing && state != ServerState::Stopped)
 				{
@@ -275,7 +280,7 @@ void ModuleNetworkingServer::onUpdate()
 				}
 
 				//Check for timeouts
-				//clientProxy.deliveryManager.processTimedOutPackets();
+				clientProxy.deilveryManager.processTimedOutPackets();
 				
 				// TODO(you): Reliability on top of UDP lab session
 			}

@@ -94,6 +94,9 @@ private:
 	// Replication
 	//////////////////////////////////////////////////////////////////////
 
+	ReplicationManagerClient replicationClient;  // cambiar variable
+	DeliveryManager deliveryManager;  // cambiar variable
+
 	// TODO(you): World state replication lab session
 
 
