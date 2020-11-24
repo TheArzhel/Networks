@@ -265,6 +265,7 @@ void ModuleNetworkingServer::onUpdate()
 				if (sendPing && state != ServerState::Stopped)
 				{
 					OutputMemoryStream pingpacket;
+					pingpacket << PROTOCOL_ID;
 					pingpacket << ServerMessage::Ping;
 
 					//Sending next Expected Input Sequence to reset the input queue
