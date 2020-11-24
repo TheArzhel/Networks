@@ -44,13 +44,17 @@ void ModuleNetworkingClient::onStart()
 		return;
 	}
 
-	state = ClientState::Connecting;
+	state = ClientState::WaitingWelcome;
 
 	inputDataFront = 0;
 	inputDataBack = 0;
 
-	secondsSinceLastHello = 9999.0f;
+	//secondsSinceLastHello = 9999.0f;
+	secondsSinceLastHello = 0.0f;
+
 	secondsSinceLastInputDelivery = 0.0f;
+	lastPacketReceivedTime = Time.time;
+
 }
 
 void ModuleNetworkingClient::onGui()
@@ -59,11 +63,11 @@ void ModuleNetworkingClient::onGui()
 
 	if (ImGui::CollapsingHeader("ModuleNetworkingClient", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		if (state == ClientState::Connecting)
+		if (state == ClientState::WaitingWelcome)
 		{
 			ImGui::Text("Connecting to server...");
 		}
-		else if (state == ClientState::Connected)
+		else if (state == ClientState::Playing)
 		{
 			ImGui::Text("Connected to server");
 
@@ -103,6 +107,7 @@ void ModuleNetworkingClient::onGui()
 void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, const sockaddr_in &fromAddress)
 {
 	// TODO(you): UDP virtual connection lab session
+	lastPacketReceivedTime = Time.time;
 
 	uint32 protoId;
 	packet >> protoId;
@@ -111,7 +116,7 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 	ServerMessage message;
 	packet >> message;
 
-	if (state == ClientState::Connecting)
+	if (state == ClientState::WaitingWelcome)
 	{
 		if (message == ServerMessage::Welcome)
 		{
@@ -119,7 +124,7 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 			packet >> networkId;
 
 			LOG("ModuleNetworkingClient::onPacketReceived() - Welcome from server");
-			state = ClientState::Connected;
+			state = ClientState::Playing;
 		}
 		else if (message == ServerMessage::Unwelcome)
 		{
@@ -127,23 +132,39 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 			disconnect();
 		}
 	}
-	else if (state == ClientState::Connected)
+	else if (state == ClientState::Playing)
 	{
 		// TODO(you): World state replication lab session
 
+	//	if (message == ServerMessage::Replication)
+	//	{
+	//		if (deliveryManager.processSequenceNumber(packet))
+	//		{
+	//			replicationClient.read(packet);
+	//		}
+	//	}
+
 		// TODO(you): Reliability on top of UDP lab session
+		if (message == ServerMessage::Ping)
+		{
+			uint32 lastPacket = 0;
+			packet >> lastPacket;
+
+			// Clear the queue				
+			inputDataFront = lastPacket;
+		}
 	}
 }
 
 void ModuleNetworkingClient::onUpdate()
 {
 	if (state == ClientState::Stopped) return;
-
+	
 
 	// TODO(you): UDP virtual connection lab session
 
 
-	if (state == ClientState::Connecting)
+	if (state == ClientState::WaitingWelcome)
 	{
 		secondsSinceLastHello += Time.deltaTime;
 
@@ -160,7 +181,7 @@ void ModuleNetworkingClient::onUpdate()
 			sendPacket(packet, serverAddress);
 		}
 	}
-	else if (state == ClientState::Connected)
+	else if (state == ClientState::Playing)
 	{
 		// TODO(you): UDP virtual connection lab session
 
@@ -199,7 +220,29 @@ void ModuleNetworkingClient::onUpdate()
 			}
 
 			// Clear the queue
-			inputDataFront = inputDataBack;
+			//inputDataFront = inputDataBack;
+
+			sendPacket(packet, serverAddress);
+		}
+
+		if (Time.time > lastPacketReceivedTime + DISCONNECT_TIMEOUT_SECONDS)
+		{
+			disconnect();
+			WLOG("Did not revived Ping from the server");
+		}
+
+		if (Time.time > secondsSinceLastHello + PING_INTERVAL_SECONDS && state != ClientState::Stopped)
+		{
+			secondsSinceLastHello = Time.time;
+
+			OutputMemoryStream packet;
+			packet << PROTOCOL_ID;
+			packet << ClientMessage::Ping;
+
+			//if (deliveryManager.hasSequenceNumbersPendingAck())
+			//{
+			//	deliveryManager.writeSequenceNumbersPendingAck(packet);
+			//}
 
 			sendPacket(packet, serverAddress);
 		}

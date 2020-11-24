@@ -19,7 +19,10 @@ void ModuleNetworkingServer::setListenPort(int port)
 
 void ModuleNetworkingServer::onStart()
 {
+
 	if (!createSocket()) return;
+
+	secondsSinceLastHello = 0.0f;
 
 	// Reuse address
 	int enable = 1;
@@ -36,6 +39,8 @@ void ModuleNetworkingServer::onStart()
 	}
 
 	state = ServerState::Listening;
+
+
 }
 
 void ModuleNetworkingServer::onGui()
@@ -187,13 +192,26 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				}
 			}
 		}
-
+		else if (message == ClientMessage::Ping)
+		{
+			//proxy->deliveryManager.processAckdSequenceNumbers(packet);
+		}
 		// TODO(you): UDP virtual connection lab session
+		if (proxy != nullptr)
+		{
+			proxy->lastPacketReceivedTime = Time.time;
+		}
 	}
 }
 
 void ModuleNetworkingServer::onUpdate()
 {
+	bool sendPing = false; // change variable
+	if (Time.time > secondsSinceLastHello + PING_INTERVAL_SECONDS)
+	{
+		sendPing = true;
+	}
+
 	if (state == ServerState::Listening)
 	{
 		// Handle networked game object destructions
@@ -214,6 +232,12 @@ void ModuleNetworkingServer::onUpdate()
 		{
 			if (clientProxy.connected)
 			{
+				if (Time.time > clientProxy.lastPacketReceivedTime + DISCONNECT_TIMEOUT_SECONDS)
+				{
+					onConnectionReset(clientProxy.address);
+					WLOG("Did not revived anything client"); //cambiar texto
+					continue;
+				}
 				// TODO(you): UDP virtual connection lab session
 
 				// Don't let the client proxy point to a destroyed game object

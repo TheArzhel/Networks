@@ -45,8 +45,9 @@ private:
 	enum class ClientState
 	{
 		Stopped,
-		Connecting,
-		Connected
+		Start,
+		WaitingWelcome,
+		Playing
 	};
 
 	ClientState state = ClientState::Stopped;
@@ -86,6 +87,7 @@ private:
 
 	// TODO(you): UDP virtual connection lab session
 
+	double lastPacketReceivedTime = 0.0f; // cambiar variable
 
 
 	//////////////////////////////////////////////////////////////////////
