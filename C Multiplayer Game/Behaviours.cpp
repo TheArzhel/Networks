@@ -29,6 +29,8 @@ void Laser::update()
 			NetworkDestroy(gameObject);
 		}
 	}
+
+	NetworkUpdate(gameObject);
 }
 
 
