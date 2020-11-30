@@ -405,6 +405,19 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initi
 	gameObject->behaviour = spaceshipBehaviour;
 	gameObject->behaviour->isServer = true;
 
+	//change this
+	// Assign a new network identity to the object
+	App->modLinkingContext->registerNetworkGameObject(gameObject);
+
+	// Notify all client to create object remotely
+	for (int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if (clientProxies[i].connected)
+		{
+			clientProxies[i].replicationServer.create(gameObject->networkId);
+		}
+	}
+
 	return gameObject;
 }
 
