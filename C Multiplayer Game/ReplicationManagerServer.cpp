@@ -47,10 +47,23 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, Delivery* deliv
 				packet << object->size.x;
 				packet << object->size.y;
 
-				std::string texture(object->sprite->texture->filename);
-				packet << texture;
+				std::string texture = "null";
 
+				if (object->sprite->texture != nullptr)
+				{
+					texture = object->sprite->texture->filename ;
+
+				}
+
+				packet << texture;
 				packet << object->explosion;
+				//packet << object->lifebar;
+
+				//if (object->lifebar) {
+				//	//lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
+				//	//float size = object->size.x;
+				//	//packet << size;
+				//}
 			}
 		}
 		else if (it_rc->second == ReplicationAction::Update)
@@ -66,8 +79,15 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, Delivery* deliv
 				packet << object->position.x;
 				packet << object->position.y;
 				packet << object->angle;
-				//if (object->animation != nullptr )
+				
 				packet << object->explosion;
+				//packet << object->lifebar;
+
+				//if (object->lifebar) {
+				//	//lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
+				//	float size = object->size.x;
+				//	packet << size;
+				//}
 			}
 
 		}

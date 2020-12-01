@@ -9,6 +9,7 @@ struct GameObject
 	vec2 size = vec2{ 0.0f, 0.0f }; // NOTE(jesus): If equals 0, it takes the size of the texture
 	float angle = 0.0f;
 	bool explosion = false;
+	//bool lifebar = false;
 	// Render component
 	Sprite *sprite = nullptr;
 	Animation *animation = nullptr;

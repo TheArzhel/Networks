@@ -38,10 +38,12 @@ void Spaceship::start()
 {
 	gameObject->tag = (uint32)(Random.next() * UINT_MAX);
 
-	lifebar = Instantiate();
+	lifebar = NetworkInstantiate();
 	lifebar->sprite = App->modRender->addSprite(lifebar);
 	lifebar->sprite->pivot = vec2{ 0.0f, 0.5f };
 	lifebar->sprite->order = 5;
+	//lifebar->lifebar = true;
+	
 }
 
 void Spaceship::onInput(const InputController &input)
@@ -99,7 +101,7 @@ void Spaceship::update()
 	lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
 	lifebar->sprite->color = lerp(colorDead, colorAlive, lifeRatio);
 
-	//NetworkUpdate(lifebar);
+	NetworkUpdate(lifebar);
 }
 
 void Spaceship::destroy()
