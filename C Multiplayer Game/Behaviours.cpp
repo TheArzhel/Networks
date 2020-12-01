@@ -106,7 +106,8 @@ void Spaceship::update()
 
 void Spaceship::destroy()
 {
-	Destroy(lifebar);
+	NetworkDestroy(lifebar);
+	//Destroy(lifebar);
 }
 
 void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
