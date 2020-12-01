@@ -528,6 +528,7 @@ void NetworkUpdate(GameObject * gameObject)
 void NetworkDestroy(GameObject * gameObject)
 {
 	NetworkDestroy(gameObject, 0.0f);
+
 }
 
 void NetworkDestroy(GameObject * gameObject, float delaySeconds)
@@ -537,3 +538,4 @@ void NetworkDestroy(GameObject * gameObject, float delaySeconds)
 
 	App->modNetServer->destroyNetworkObject(gameObject, delaySeconds);
 }
+

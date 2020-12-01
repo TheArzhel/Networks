@@ -107,7 +107,6 @@ void Spaceship::update()
 void Spaceship::destroy()
 {
 	NetworkDestroy(lifebar);
-	//Destroy(lifebar);
 }
 
 void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
@@ -134,6 +133,8 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 				position = gameObject->position;
 
 				NetworkDestroy(gameObject);
+				
+				// desconectar
 			}
 
 			GameObject *explosion = NetworkInstantiate();

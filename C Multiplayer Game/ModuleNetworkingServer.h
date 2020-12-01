@@ -34,7 +34,7 @@ private:
 
 	void onDisconnect() override;
 
-
+	
 
 	//////////////////////////////////////////////////////////////////////
 	// Client proxies
@@ -94,7 +94,7 @@ private:
 
 	void updateNetworkObject(GameObject *gameObject);
 	friend void (NetworkUpdate)(GameObject *);
-
+	
 	void destroyNetworkObject(GameObject *gameObject);
 	void destroyNetworkObject(GameObject *gameObject, float delaySeconds);
 	friend void (NetworkDestroy)(GameObject *);
