@@ -53,20 +53,21 @@ void ReplicationManagerClient::read(const InputMemoryStream & packet)
 				object->animation = App->modRender->addAnimation(object);
 				object->animation->clip = App->modResources->explosionClip;
 			}
+			packet >> object->lifebar;
 			 
-			//if (object->lifebar)
-			//{
-			//	packet >> object->size.x;
-			//	object->size.y = 5.0f;
-			//	object->sprite->order = 5;
-			//	object->sprite->pivot = vec2{ 0.0f, 0.5f };
-			//}
+			if (object->lifebar)
+			{
+				packet >> object->size.x;
+				object->size.y = 5.0f;
+				object->sprite->order = 5;
+				object->sprite->pivot = vec2{ 0.0f, 0.5f };
+				packet >> object->sprite->color.x;
+				packet >> object->sprite->color.y;
+				packet >> object->sprite->color.z;
+				packet >> object->sprite->color.a;
+			}
 
-			//if (object->lifebar) {
-			//	//lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
-			//	//float size = object->size.x;
-			//	//packet << size;
-			//}
+			
 
 		}
 		else if (action == ReplicationAction::Update)
@@ -86,24 +87,25 @@ void ReplicationManagerClient::read(const InputMemoryStream & packet)
 
 			packet >> object->explosion;
 
-			//packet >> object->lifebar;
+			packet >> object->lifebar;
 
 			if (object)
 			{
 
-				//packet >> it_rc->first;
-				//packet >> it_rc->second;
-
 				object->position.x = pos_x;
 				object->position.y = pos_y;
 				object->angle = angle;
-				//if (object->lifebar)
-				//{
-				//	packet >> sizex;
-				//	object->size.x = sizex;
-				//	object->size.y = sizey;
-				//
-				//}
+				if (object->lifebar)
+				{
+					packet >> sizex;
+					object->size.x = sizex;
+					object->size.y = sizey;
+					packet >> object->sprite->color.x;
+					packet >> object->sprite->color.y;
+					packet >> object->sprite->color.z;
+					packet >> object->sprite->color.a;
+				
+				}
 			}
 		}
 		else

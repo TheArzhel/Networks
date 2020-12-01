@@ -42,7 +42,7 @@ void Spaceship::start()
 	lifebar->sprite = App->modRender->addSprite(lifebar);
 	lifebar->sprite->pivot = vec2{ 0.0f, 0.5f };
 	lifebar->sprite->order = 5;
-	//lifebar->lifebar = true;
+	lifebar->lifebar = true;
 	
 }
 

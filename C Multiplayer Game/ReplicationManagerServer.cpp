@@ -57,13 +57,21 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, Delivery* deliv
 
 				packet << texture;
 				packet << object->explosion;
-				//packet << object->lifebar;
+				packet << object->lifebar;
 
-				//if (object->lifebar) {
-				//	//lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
-				//	//float size = object->size.x;
-				//	//packet << size;
-				//}
+				if (object->lifebar) {
+					//lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
+					float size = object->size.x;
+					packet << size;
+					float colorx = object->sprite->color.x;
+					float colory = object->sprite->color.y;
+					float colorz = object->sprite->color.z;
+					float colora = object->sprite->color.a;
+					packet << colorx;
+					packet << colory;
+					packet << colorz;
+					packet << colora;
+				}
 			}
 		}
 		else if (it_rc->second == ReplicationAction::Update)
@@ -81,13 +89,21 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, Delivery* deliv
 				packet << object->angle;
 				
 				packet << object->explosion;
-				//packet << object->lifebar;
+				packet << object->lifebar;
 
-				//if (object->lifebar) {
-				//	//lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
-				//	float size = object->size.x;
-				//	packet << size;
-				//}
+				if (object->lifebar) {
+					//lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
+					float size = object->size.x;
+					packet << size;
+					float colorx = object->sprite->color.x;
+					float colory = object->sprite->color.y;
+					float colorz = object->sprite->color.z;
+					float colora = object->sprite->color.a;
+					packet << colorx;
+					packet << colory;
+					packet << colorz;
+					packet << colora;
+				}
 			}
 
 		}
