@@ -23,7 +23,7 @@ void ModuleLinkingContext::registerNetworkGameObjectWithNetworkId(GameObject * g
 	ASSERT(networkId != 0);
 	uint16 arrayIndex = arrayIndexFromNetworkId(networkId);
 	ASSERT(arrayIndex < MAX_NETWORK_OBJECTS);
-	ASSERT(networkGameObjects[arrayIndex] == nullptr);
+	ASSERT(networkGameObjects[arrayIndex] == nullptr); //error
 	networkGameObjects[arrayIndex] = gameObject;
 	gameObject->networkId = networkId;
 	networkGameObjectsCount++;
@@ -60,9 +60,9 @@ void ModuleLinkingContext::getNetworkGameObjects(GameObject * gameObjects[MAX_NE
 
 	for (uint16 i = 0; i < MAX_NETWORK_OBJECTS && insertIndex < networkGameObjectsCount; ++i)
 	{
-		if (networkGameObjects[i] != nullptr)
+		if (networkGameObjects[i] != nullptr && networkGameObjects[i]->networkId != 0)
 		{
-			ASSERT(networkGameObjects[i]->networkId != 0);
+			ASSERT(networkGameObjects[i]->networkId != 0); //error
 			gameObjects[insertIndex++] = networkGameObjects[i];
 		}
 	}
@@ -80,7 +80,7 @@ void ModuleLinkingContext::unregisterNetworkGameObject(GameObject *gameObject)
 	ASSERT(gameObject != nullptr);
 	uint16 arrayIndex = arrayIndexFromNetworkId(gameObject->networkId);
 	ASSERT(arrayIndex < MAX_NETWORK_OBJECTS);
-	ASSERT(networkGameObjects[arrayIndex] == gameObject);
+	ASSERT(networkGameObjects[arrayIndex] == gameObject); //error
 	networkGameObjects[arrayIndex] = nullptr;
 	gameObject->networkId = 0;
 	networkGameObjectsCount--;
