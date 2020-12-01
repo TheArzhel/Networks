@@ -49,6 +49,8 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, Delivery* deliv
 
 				std::string texture(object->sprite->texture->filename);
 				packet << texture;
+
+				packet << object->explosion;
 			}
 		}
 		else if (it_rc->second == ReplicationAction::Update)
@@ -64,7 +66,10 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet, Delivery* deliv
 				packet << object->position.x;
 				packet << object->position.y;
 				packet << object->angle;
+				//if (object->animation != nullptr )
+				packet << object->explosion;
 			}
+
 		}
 		else if (it_rc->second == ReplicationAction::Destroy)
 		{

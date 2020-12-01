@@ -38,8 +38,8 @@ void ScreenOverlay::update()
 	{
 		oldScene->enabled = false;
 		newScene->enabled = true;
+
 		//error
-		
 		overlay->sprite->color.a = 1.0f - (transitionTimeElapsed - halfTransitionTime) / halfTransitionTime;
 		if (overlay->sprite->color.a < 0.0f) { overlay->sprite->color.a = 0.0f; }
 		

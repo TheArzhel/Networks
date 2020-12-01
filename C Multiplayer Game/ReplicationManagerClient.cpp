@@ -43,6 +43,17 @@ void ReplicationManagerClient::read(const InputMemoryStream & packet)
 			object->sprite->order = 5;
 			object->sprite->texture = App->modTextures->loadTexture(texture.c_str());
 
+			object->sprite->order = 100;
+
+			packet >> object->explosion;
+
+			if (object->explosion)
+			{
+				object->animation = App->modRender->addAnimation(object);
+				object->animation->clip = App->modResources->explosionClip;
+			}
+
+
 		}
 		else if (action == ReplicationAction::Update)
 		{
@@ -57,11 +68,19 @@ void ReplicationManagerClient::read(const InputMemoryStream & packet)
 			packet >> pos_y;
 			packet >> angle;
 
+			packet >> object->explosion;
+
 			if (object)
 			{
+
+				//packet >> it_rc->first;
+				//packet >> it_rc->second;
+
 				object->position.x = pos_x;
 				object->position.y = pos_y;
 				object->angle = angle;
+				//if (object->animation != nullptr)
+				//packet >> object->animation;
 			}
 		}
 		else

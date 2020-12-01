@@ -34,9 +34,6 @@ void Laser::update()
 }
 
 
-
-
-
 void Spaceship::start()
 {
 	gameObject->tag = (uint32)(Random.next() * UINT_MAX);
@@ -101,6 +98,8 @@ void Spaceship::update()
 	lifebar->position = gameObject->position + vec2{ -50.0f, -50.0f };
 	lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
 	lifebar->sprite->color = lerp(colorDead, colorAlive, lifeRatio);
+
+	//NetworkUpdate(lifebar);
 }
 
 void Spaceship::destroy()
@@ -145,6 +144,8 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 
 			explosion->animation = App->modRender->addAnimation(explosion);
 			explosion->animation->clip = App->modResources->explosionClip;
+			explosion->explosion = true;
+			//NetworkUpdate(explosion);
 
 			NetworkDestroy(explosion, 2.0f);
 
@@ -152,6 +153,7 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 			// You need to somehow make this happen in clients
 			App->modSound->playAudioClip(App->modResources->audioClipExplosion);
 		}
+
 	}
 }
 
