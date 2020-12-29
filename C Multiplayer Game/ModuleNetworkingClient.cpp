@@ -100,6 +100,8 @@ void ModuleNetworkingClient::onGui()
 
 			ImGui::Text("Input:");
 			ImGui::InputFloat("Delivery interval (s)", &inputDeliveryIntervalSeconds, 0.01f, 0.1f, 4);
+			ImGui::Checkbox("Client Prediction", &Prediction);
+			
 		}
 	}
 }
@@ -143,6 +145,33 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 				replicationClient.read(packet);
 			}
 		}
+
+		if (message == ServerMessage::Input)
+		{
+			uint32 sequenceNumber;
+			packet >> sequenceNumber;
+
+			if (sequenceNumber > inputDataFront)
+				inputDataFront = sequenceNumber;
+
+			if (Prediction) {
+				GameObject* p_Go = App->modLinkingContext->getNetworkGameObject(networkId);
+				for (uint32 i = inputDataFront; i < inputDataBack; ++i)
+				{
+					InputPacketData& inputPacketData = inputData[i % ArrayCount(inputData)];
+
+					InputController p_controller = inputControllerFromInputPacketData(inputPacketData, p_controller);
+
+					if (p_Go != nullptr)
+					{
+						if(p_Go->behaviour!=nullptr)
+							p_Go->behaviour->onInput(p_controller);
+					}
+				}
+			}
+
+		}
+
 
 		// TODO(you): Reliability on top of UDP lab session
 		if (message == ServerMessage::Ping)
@@ -195,6 +224,17 @@ void ModuleNetworkingClient::onUpdate()
 			inputPacketData.horizontalAxis = Input.horizontalAxis;
 			inputPacketData.verticalAxis = Input.verticalAxis;
 			inputPacketData.buttonBits = packInputControllerButtons(Input);
+
+			if (Prediction)
+			{
+				GameObject* p_Go = App->modLinkingContext->getNetworkGameObject(networkId);
+
+				if (p_Go != nullptr)
+				{
+					if (p_Go->behaviour != nullptr)
+						p_Go->behaviour->onInput(Input);
+				}
+			}
 		}
 
 		secondsSinceLastInputDelivery += Time.deltaTime;
@@ -209,7 +249,7 @@ void ModuleNetworkingClient::onUpdate()
 			packet << ClientMessage::Input;
 
 			// TODO(you): Reliability on top of UDP lab session
-
+			
 			for (uint32 i = inputDataFront; i < inputDataBack; ++i)
 			{
 				InputPacketData &inputPacketData = inputData[i % ArrayCount(inputData)];
@@ -217,6 +257,9 @@ void ModuleNetworkingClient::onUpdate()
 				packet << inputPacketData.horizontalAxis;
 				packet << inputPacketData.verticalAxis;
 				packet << inputPacketData.buttonBits;
+
+
+
 			}
 
 			// Clear the queue

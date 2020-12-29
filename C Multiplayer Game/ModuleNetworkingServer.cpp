@@ -191,8 +191,17 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 						proxy->nextExpectedInputSequenceNumber = inputData.sequenceNumber + 1;
 					}
 				}
+
+				OutputMemoryStream inputRecieved;
+				inputRecieved << PROTOCOL_ID;
+				inputRecieved << ServerMessage::Input;
+				inputRecieved << proxy->nextExpectedInputSequenceNumber;
+				sendPacket(inputRecieved, fromAddress);
 			}
 		}
+
+
+	
 		else if (message == ClientMessage::Ping)
 		{
 			proxy->deilveryManager.processAckdSequenceNumbers(packet);

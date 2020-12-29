@@ -30,6 +30,7 @@ bool ModuleGameObject::preUpdate()
 
 bool ModuleGameObject::update()
 {
+
 	// Delayed destructions
 	for (DelayedDestroyEntry &destroyEntry : gameObjectsWithDelayedDestruction)
 	{
