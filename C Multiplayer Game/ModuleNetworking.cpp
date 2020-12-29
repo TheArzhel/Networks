@@ -291,6 +291,7 @@ void ModuleNetworking::processIncomingPackets()
 			}
 			else if (error == WSAECONNRESET)
 			{
+				//PROBLEM DETECTED HERE
 				//this can happen if a remote socket closed and we haven't DC'd yet.
 				//this is the ICMP message being sent back saying the port on that computer is closed
 				char fromAddressStr[64];
