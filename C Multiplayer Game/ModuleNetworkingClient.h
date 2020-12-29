@@ -97,6 +97,7 @@ private:
 	ReplicationManagerClient replicationClient;  // cambiar variable
 	DeliveryManager deliveryManager;  // cambiar variable
 
+	bool Prediction = true;
 	// TODO(you): World state replication lab session
 
 
