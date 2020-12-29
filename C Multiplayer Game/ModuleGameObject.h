@@ -10,6 +10,7 @@ struct GameObject
 	float angle = 0.0f;
 	bool explosion = false;
 	bool lifebar = false;
+	bool end = false;
 	// Render component
 	Sprite *sprite = nullptr;
 	Animation *animation = nullptr;

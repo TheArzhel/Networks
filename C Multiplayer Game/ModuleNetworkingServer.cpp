@@ -482,6 +482,8 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject, float delaySeconds)
 {
 	uint32 emptyIndex = MAX_GAME_OBJECTS;
+	bool end = false;
+	end = gameObject->end;
 	for (uint32 i = 0; i < MAX_GAME_OBJECTS; ++i)
 	{
 		if (netGameObjectsToDestroyWithDelay[i].object == gameObject)
@@ -503,6 +505,11 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject, float
 
 	netGameObjectsToDestroyWithDelay[emptyIndex].object = gameObject;
 	netGameObjectsToDestroyWithDelay[emptyIndex].delaySeconds = delaySeconds;
+
+	//if (end)
+		//disconnect();
+	
+
 }
 
 

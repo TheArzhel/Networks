@@ -131,7 +131,7 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 				// Centered big explosion
 				size = 250.0f + 100.0f * Random.next();
 				position = gameObject->position;
-
+				gameObject->end = true;
 				NetworkDestroy(gameObject);
 				
 				// desconectar
