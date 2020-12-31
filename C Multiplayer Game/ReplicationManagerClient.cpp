@@ -22,6 +22,7 @@ void ReplicationManagerClient::read(const InputMemoryStream & packet)
 
 			if (object)
 			{
+
 				App->modLinkingContext->unregisterNetworkGameObject(object);
 				Destroy(object);
 			}
@@ -42,7 +43,7 @@ void ReplicationManagerClient::read(const InputMemoryStream & packet)
 			object->sprite = App->modRender->addSprite(object);
 			object->sprite->order = 5;
 			if (texture!="null")
-			object->sprite->texture = App->modTextures->loadTexture(texture.c_str());
+				object->sprite->texture = App->modTextures->loadTexture(texture.c_str());
 
 			object->sprite->order = 100;
 
@@ -65,8 +66,19 @@ void ReplicationManagerClient::read(const InputMemoryStream & packet)
 				packet >> object->sprite->color.y;
 				packet >> object->sprite->color.z;
 				packet >> object->sprite->color.a;
+
 			}
 
+		/*	if (!object->explosion && !object->lifebar && texture!= "laser.png") {
+				if(object->behaviour == nullptr)
+					object->behaviour = App->modBehaviour->addSpaceship(object);
+			}*/
+
+			if (texture == "spacecraft1.png") {
+				//already added?
+				//if (object->behaviour == nullptr)
+				//	object->behaviour = App->modBehaviour->addSpaceship(object);
+			}
 			
 
 		}
