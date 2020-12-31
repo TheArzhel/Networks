@@ -1,22 +1,27 @@
 Networks and Online Games 
 
-Lab 3 - TCP Chat
+Multiplayer Game in C++
 
 Done by 
 Andres Saladrigas
 Roger Leon
 Clara Ratera
 
-List of command and added features:
-Command list:
-/help show commands
-/list connected users
-/kick [name] works only for admin users
-/whisper [name] [message] 
-/change_name [name] 
-/remove_admin remove user from admin, works only for admin users
-/add_admin add admin priviledge
-/clear chat delete chat
-/add_block [username] username can no loger send messaghes, work only for admin
-/remove_block [username] user can write and send messages again, work only for admin
-change your color to all users 
+Instructions: 
+- Connect by entering a name and selecting a spaceship type, then press Connect to server
+- Rotate left/right with A/D keys
+- Accelerate with Down Arrow
+- Fire with Left Arrow
+- Disconnect at any time pressing Disconnect button top left
+
+Features: 
+	Complete: 
+	- Accept X amount of players
+	- Handle players join/leave events
+	- World state replication
+	
+	Incomplete:
+	- Redundant sending of input packets
+	- Delivery manager notifications
+	- Client side prediction
+	- Entity interpolation
